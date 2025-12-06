@@ -7,7 +7,7 @@ Skills teach AI agents how to use your connected apps — they're markdown files
 ## What's a Skill?
 
 A skill is a markdown file with:
-- **YAML frontmatter** — metadata (auth config, abilities, API settings)
+- **YAML frontmatter** — metadata (auth config, API settings)
 - **Instructions** — API docs the AI reads to make requests
 
 Example:
@@ -18,22 +18,13 @@ name: Todoist
 description: Personal task management
 category: productivity
 
-abilities:
-  - id: read_tasks
-    label: "Read your tasks"
-    read_only: true
-  - id: write_tasks
-    label: "Create and modify tasks"
-  - id: delete_tasks
-    label: "Delete tasks"
-  - id: manage_projects
-    label: "Manage projects"
-
 auth:
   type: api_key
   header: Authorization
   prefix: "Bearer "
+
 api:
+  type: rest    # rest, graphql, sqlite, local
   base_url: https://api.todoist.com
 ---
 
@@ -42,39 +33,25 @@ api:
 API documentation here...
 ```
 
-## Abilities
+## Permissions: See + Do
 
-Abilities define what AI can do with a service. Users toggle these per account—like macOS app permissions.
+Passport uses a simple two-level permission model per account:
 
-| Field | Required | Description |
-|-------|----------|-------------|
-| `id` | Yes | Unique identifier (e.g., `read_tasks`) |
-| `label` | Yes | Human-readable name shown in UI |
-| `read_only` | No | If `true`, this is a View ability. If `false`/absent, it's a Do ability. |
+| Permission | Description | MCP Tool |
+|------------|-------------|----------|
+| **See** | Read data (always enabled if account exists) | `passport_see` |
+| **Do** | Create, modify, delete data (user toggles this) | `passport_do` |
 
-**Two types of abilities:**
-- **View** (`read_only: true`) — Read/view data only, uses `passport_view` tool
-- **Do** (default) — Take action (create, update, delete), uses `passport_do` tool
+**Enforcement is based on API type:**
+- **REST** (`type: rest`) — GET = See, POST/PUT/PATCH/DELETE = Do
+- **GraphQL** (`type: graphql`) — query = See, mutation = Do  
+- **SQLite** (`type: sqlite`) — SELECT = See, INSERT/UPDATE/DELETE = Do
 
 **Default access levels** (configurable in Settings):
-- **Read only** — Auto-enable View abilities only
-- **Full access** — Auto-enable all abilities (View + Do)
+- **See only** — New accounts can only read data (safe default)
+- **See + Do** — New accounts can read and take actions
 
-**Example abilities for Todoist:**
-```yaml
-abilities:
-  - id: read_tasks
-    label: "Read your tasks"
-    read_only: true           # View ability
-  - id: write_tasks
-    label: "Create and modify tasks"
-                              # Do ability (default)
-  - id: delete_tasks
-    label: "Delete tasks"
-                              # Do ability
-```
-
-Users can have different abilities per account (e.g., Personal has full access, Work is read-only).
+Users can have different permissions per account (e.g., Personal has Do enabled, Work is See-only).
 
 ## Available Skills
 

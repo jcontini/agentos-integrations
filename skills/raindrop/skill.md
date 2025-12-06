@@ -7,15 +7,6 @@ category: productivity
 icon: https://raindrop.io/favicon.ico
 color: "#0082FF"
 
-abilities:
-  - id: read_bookmarks
-    label: "Read bookmarks and collections"
-    read_only: true
-  - id: save_bookmarks
-    label: "Save new bookmarks"
-  - id: delete_bookmarks
-    label: "Delete bookmarks"
-
 auth:
   type: api_key
   header: Authorization

@@ -7,17 +7,6 @@ category: productivity
 icon: https://cdn.simpleicons.org/todoist
 color: "#e44332"
 
-abilities:
-  - id: read_tasks
-    label: "Read your tasks"
-    read_only: true
-  - id: write_tasks
-    label: "Create and modify tasks"
-  - id: delete_tasks
-    label: "Delete tasks"
-  - id: manage_projects
-    label: "Manage projects"
-
 auth:
   type: api_key
   header: Authorization

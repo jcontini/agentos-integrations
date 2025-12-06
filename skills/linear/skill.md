@@ -7,15 +7,6 @@ category: productivity
 icon: https://cdn.simpleicons.org/linear
 color: "#5E6AD2"
 
-abilities:
-  - id: read_issues
-    label: "Read issues and projects"
-    read_only: true
-  - id: write_issues
-    label: "Create and update issues"
-  - id: add_comments
-    label: "Add comments"
-
 auth:
   type: api_key
   header: Authorization

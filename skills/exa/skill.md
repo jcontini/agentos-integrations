@@ -7,14 +7,6 @@ category: search
 icon: https://www.google.com/s2/favicons?domain=exa.ai&sz=64
 color: "#5046E5"
 
-abilities:
-  - id: search
-    label: "Search the web"
-    read_only: true
-  - id: extract
-    label: "Extract content from URLs"
-    read_only: true
-
 auth:
   type: api_key
   header: x-api-key
