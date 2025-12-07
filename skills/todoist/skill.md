@@ -1,33 +1,38 @@
 # Todoist
 
-**Use for:** Personal task management - create, list, complete, update, delete tasks
+Personal task management - create, list, complete, update, delete tasks.
+
+## Critical: Todoist API Quirks
+
+> **Updates use POST, not PUT!** Todoist returns 405 if you use PUT.
+>
+> **Cannot change project_id!** To move a task to a different project, you must delete it and recreate it with the new project_id.
 
 ## Endpoints
 
 | Operation | Method | Path |
 |-----------|--------|------|
-| List tasks | GET | `rest/v2/tasks` |
-| Get task | GET | `rest/v2/tasks/{id}` |
-| Create task | POST | `rest/v2/tasks` |
-| Update task | POST | `rest/v2/tasks/{id}` |
-| Complete task | POST | `rest/v2/tasks/{id}/close` |
-| Reopen task | POST | `rest/v2/tasks/{id}/reopen` |
-| Delete task | DELETE | `rest/v2/tasks/{id}` |
-| List projects | GET | `rest/v2/projects` |
-| List labels | GET | `rest/v2/labels` |
+| List tasks | GET | `tasks` |
+| Get task | GET | `tasks/{id}` |
+| Create task | POST | `tasks` |
+| **Update task** | **POST** | `tasks/{id}` |
+| Complete task | POST | `tasks/{id}/close` |
+| Reopen task | POST | `tasks/{id}/reopen` |
+| Delete task | DELETE | `tasks/{id}` |
+| List projects | GET | `projects` |
+| Get project | GET | `projects/{id}` |
+| List labels | GET | `labels` |
 
-## Query Filters
+## Filters (query params)
 
-Add to path as query params:
-
-| Filter | Path |
-|--------|------|
-| Due today | `rest/v2/tasks?filter=today` |
-| Due this week | `rest/v2/tasks?filter=7%20days` |
-| Overdue | `rest/v2/tasks?filter=overdue` |
-| No due date | `rest/v2/tasks?filter=no%20date` |
-| By project | `rest/v2/tasks?project_id={id}` |
-| Subtasks of task | `rest/v2/tasks?parent_id={id}` |
+| Filter | Example |
+|--------|---------|
+| Due today | `tasks?filter=today` |
+| Due this week | `tasks?filter=7%20days` |
+| Overdue | `tasks?filter=overdue` |
+| No due date | `tasks?filter=no%20date` |
+| By project | `tasks?project_id={id}` |
+| Subtasks | `tasks?parent_id={id}` |
 
 ## Create Task
 
@@ -44,15 +49,16 @@ Add to path as query params:
 
 **Fields:**
 - `content` (required): Task title
-- `due_string`: Natural language date (`today`, `tomorrow`, `next monday`, `2025-01-15`)
-- `labels`: Array of label names
+- `due_string`: Natural language (`today`, `tomorrow`, `next monday`, `2025-01-15`)
+- `labels`: Array of label names - **always include `["AI"]` for AI-created tasks**
 - `priority`: 1 (normal) to 4 (urgent)
-- `project_id`: Target project (cannot be changed after creation)
-- `parent_id`: Create as subtask of another task
+- `project_id`: Target project - **set at creation, cannot be changed later!**
+- `parent_id`: Create as subtask
 
-## Update Task
+## Update Task (POST, not PUT!)
 
 ```json
+POST tasks/{id}
 {
   "content": "Updated title",
   "due_string": "tomorrow",
@@ -60,20 +66,40 @@ Add to path as query params:
 }
 ```
 
-**Note:** Cannot update `project_id`. To move a task, delete and recreate it.
+**Updateable fields:** `content`, `description`, `due_string`, `due_date`, `priority`, `labels`
+
+**NOT updateable:** `project_id` - must delete and recreate to move task
+
+## Move Task to Different Project (Workaround)
+
+Since `project_id` cannot be updated, to move a task:
+
+1. GET the task to preserve its data
+2. DELETE the old task
+3. POST a new task with the new `project_id` and all preserved fields
+
+## Complete/Reopen Task
+
+```json
+POST tasks/{id}/close   // Complete
+POST tasks/{id}/reopen  // Reopen
+```
+
+No body required.
 
 ## AI Defaults
 
-When creating tasks for the user:
-1. Always add `"labels": ["AI"]` so user knows task was AI-created
-2. Use `"due_string": "today"` if user doesn't specify a date
-3. Include `project_id` at creation if user specifies a project
+When creating tasks:
+1. Always add `"labels": ["AI"]` so user knows it was AI-created
+2. Use `"due_string": "today"` if no date specified
+3. Set `project_id` at creation if user specifies a project (can't change later!)
 
 ## Important Notes
 
-- **Subtasks:** When retrieving a task, also fetch subtasks with `?parent_id={task_id}`
-- **Priority:** 1 = normal, 4 = urgent (reverse of what you might expect)
+- **Subtasks:** Query with `?parent_id={task_id}` to get a task's subtasks
+- **Priority:** 1=normal, 4=urgent (counterintuitive!)
 - **Rate limits:** ~450 requests per 15 minutes
+- **Updates:** Always use POST method, never PUT
 
 ## Full API Docs
 
