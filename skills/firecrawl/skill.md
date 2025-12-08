@@ -11,6 +11,7 @@ auth:
   type: api_key
   header: Authorization
   prefix: "Bearer "
+  help_url: https://www.firecrawl.dev/app/api-keys
 
 requires:
   - curl
