@@ -18,7 +18,7 @@ requires:
 
 actions:
   search:
-    description: Search the web using semantic/neural search, returns URLs and optionally content
+    description: Search the web with optional content extraction. Use include_text=true only when you need page content.
     params:
       query:
         type: string
@@ -26,7 +26,7 @@ actions:
         description: Natural language search query
       num_results:
         type: integer
-        default: 10
+        default: "5"
         description: Number of results (1-100)
       type:
         type: string
@@ -34,12 +34,12 @@ actions:
         description: "Search type: auto, neural, or keyword"
       include_text:
         type: boolean
-        default: true
-        description: Include page text content in results
+        default: "false"
+        description: Include page text content (slower, use only when needed)
       livecrawl:
         type: string
-        default: "always"
-        description: "Freshness: always, preferred, fallback, never"
+        default: "never"
+        description: "Freshness: never (fastest), fallback, preferred, always (slowest)"
       include_domains:
         type: string
         description: Comma-separated domains to limit search to
@@ -48,12 +48,13 @@ actions:
         description: Comma-separated domains to exclude
     run: |
       # Build JSON payload
+      INCLUDE_TEXT="${PARAM_INCLUDE_TEXT:-false}"
       PAYLOAD=$(jq -n \
         --arg query "$PARAM_QUERY" \
-        --argjson num "${PARAM_NUM_RESULTS:-10}" \
+        --argjson num "${PARAM_NUM_RESULTS:-5}" \
         --arg type "${PARAM_TYPE:-auto}" \
-        --argjson text "${PARAM_INCLUDE_TEXT:-true}" \
-        --arg livecrawl "${PARAM_LIVECRAWL:-always}" \
+        --arg text "$INCLUDE_TEXT" \
+        --arg livecrawl "${PARAM_LIVECRAWL:-never}" \
         --arg include "$PARAM_INCLUDE_DOMAINS" \
         --arg exclude "$PARAM_EXCLUDE_DOMAINS" \
         '{
@@ -61,17 +62,17 @@ actions:
           numResults: $num,
           type: $type
         }
-        + (if $text then {contents: {text: true, livecrawl: $livecrawl}} else {} end)
+        + (if $text == "true" then {contents: {text: true, livecrawl: $livecrawl}} else {} end)
         + (if $include != "" then {includeDomains: ($include | split(",") | map(gsub("^\\s+|\\s+$"; "")))} else {} end)
         + (if $exclude != "" then {excludeDomains: ($exclude | split(",") | map(gsub("^\\s+|\\s+$"; "")))} else {} end)')
       
-      curl -s -X POST "https://api.exa.ai/search" \
+      curl -s -m 30 -X POST "https://api.exa.ai/search" \
         -H "x-api-key: $AUTH_TOKEN" \
         -H "Content-Type: application/json" \
         -d "$PAYLOAD" | jq .
 
   search_urls:
-    description: Quick search returning just URLs (no content, faster/cheaper)
+    description: Quick search returning just URLs and titles (fastest, cheapest)
     params:
       query:
         type: string
@@ -79,24 +80,24 @@ actions:
         description: Natural language search query
       num_results:
         type: integer
-        default: 10
+        default: "5"
         description: Number of results (1-100)
       type:
         type: string
         default: "auto"
         description: "Search type: auto, neural, or keyword"
     run: |
-      curl -s -X POST "https://api.exa.ai/search" \
+      curl -s -m 15 -X POST "https://api.exa.ai/search" \
         -H "x-api-key: $AUTH_TOKEN" \
         -H "Content-Type: application/json" \
         -d "{
           \"query\": \"$PARAM_QUERY\",
-          \"numResults\": ${PARAM_NUM_RESULTS:-10},
+          \"numResults\": ${PARAM_NUM_RESULTS:-5},
           \"type\": \"${PARAM_TYPE:-auto}\"
         }" | jq -r '.results[] | "\(.title)\n  \(.url)\n"'
 
   extract:
-    description: Extract content from specific URLs
+    description: Extract content from specific URLs (use after search_urls to get full content)
     params:
       urls:
         type: string
@@ -104,19 +105,19 @@ actions:
         description: Comma-separated URLs to extract content from
       livecrawl:
         type: string
-        default: "always"
-        description: "Freshness: always (recommended), fallback, never"
+        default: "never"
+        description: "Freshness: never (fastest), fallback, always (slowest)"
     run: |
       # Convert comma-separated URLs to JSON array
       URLS_JSON=$(echo "$PARAM_URLS" | jq -R 'split(",") | map(gsub("^\\s+|\\s+$"; ""))')
       
-      curl -s -X POST "https://api.exa.ai/contents" \
+      curl -s -m 45 -X POST "https://api.exa.ai/contents" \
         -H "x-api-key: $AUTH_TOKEN" \
         -H "Content-Type: application/json" \
         -d "{
           \"urls\": $URLS_JSON,
           \"text\": true,
-          \"livecrawl\": \"${PARAM_LIVECRAWL:-always}\"
+          \"livecrawl\": \"${PARAM_LIVECRAWL:-never}\"
         }" | jq .
 
   find_similar:
@@ -128,24 +129,25 @@ actions:
         description: URL to find similar pages for
       num_results:
         type: integer
-        default: 10
+        default: "5"
         description: Number of results (1-100)
       include_text:
         type: boolean
-        default: true
-        description: Include page text content in results
+        default: "false"
+        description: Include page text content (slower)
     run: |
+      INCLUDE_TEXT="${PARAM_INCLUDE_TEXT:-false}"
       PAYLOAD=$(jq -n \
         --arg url "$PARAM_URL" \
-        --argjson num "${PARAM_NUM_RESULTS:-10}" \
-        --argjson text "${PARAM_INCLUDE_TEXT:-true}" \
+        --argjson num "${PARAM_NUM_RESULTS:-5}" \
+        --arg text "$INCLUDE_TEXT" \
         '{
           url: $url,
           numResults: $num
         }
-        + (if $text then {contents: {text: true, livecrawl: "always"}} else {} end)')
+        + (if $text == "true" then {contents: {text: true, livecrawl: "never"}} else {} end)')
       
-      curl -s -X POST "https://api.exa.ai/findSimilar" \
+      curl -s -m 30 -X POST "https://api.exa.ai/findSimilar" \
         -H "x-api-key: $AUTH_TOKEN" \
         -H "Content-Type: application/json" \
         -d "$PAYLOAD" | jq .
@@ -153,91 +155,85 @@ actions:
 
 # Exa
 
-Semantic web search and content extraction. Exa uses neural search to find content by meaning, not just keywords—great for research, finding niche content, and extracting clean page text.
+Semantic web search and content extraction. Neural search finds content by meaning, not just keywords.
 
-## Requirements
+## Recommended Workflow
 
-This skill requires `curl` and `jq` (usually pre-installed on macOS).
+**Fast (2 steps):**
+1. `search_urls` → Get relevant URLs (~1s)
+2. `extract` → Get content from the URLs you need
+
+**Simple (1 step):**
+- `search` with `include_text: true` → Slower but gets everything
 
 ## Actions
 
+### search_urls ⚡ (fastest)
+Quick search returning just URLs and titles.
+
+```
+action: search_urls
+params: {query: "macOS default apps"}
+```
+
+With more results:
+```
+action: search_urls
+params: {query: "macOS default apps", num_results: 10}
+```
+
 ### search
-Full semantic search with page content included. Best for research queries.
+Search with optional content extraction.
 
-**Parameters:**
-- `query` (required): Natural language search query
-- `num_results` (optional): Number of results, default 10 (max 100)
-- `type` (optional): `auto`, `neural`, or `keyword` - default `auto`
-- `include_text` (optional): Include page content, default `true`
-- `livecrawl` (optional): `always`, `preferred`, `fallback`, `never` - default `always`
-- `include_domains` (optional): Comma-separated domains to limit search
-- `exclude_domains` (optional): Comma-separated domains to exclude
-
-**Examples:**
 ```
-use-skill(skill: "exa", action: "search", params: {query: "best practices for building MCP servers"})
-use-skill(skill: "exa", action: "search", params: {query: "rust async patterns", num_results: 5})
-use-skill(skill: "exa", action: "search", params: {query: "AI news", include_domains: "techcrunch.com,theverge.com"})
+action: search
+params: {query: "rust async patterns"}
 ```
 
-### search_urls
-Quick search returning just URLs and titles (no content). Faster and cheaper.
-
-**Parameters:**
-- `query` (required): Natural language search query
-- `num_results` (optional): Number of results, default 10
-- `type` (optional): `auto`, `neural`, or `keyword`
-
-**Example:**
+With page content (slower):
 ```
-use-skill(skill: "exa", action: "search_urls", params: {query: "tauri desktop app tutorials"})
+action: search
+params: {query: "rust async patterns", include_text: true, num_results: 3}
+```
+
+With fresh/live crawled content (slowest):
+```
+action: search
+params: {query: "latest AI news", include_text: true, livecrawl: "always"}
 ```
 
 ### extract
-Extract clean text content from specific URLs. Use when you already know the URLs.
+Get content from specific URLs.
 
-**Parameters:**
-- `urls` (required): Comma-separated URLs to extract
-- `livecrawl` (optional): `always` (recommended), `fallback`, `never`
-
-**Example:**
 ```
-use-skill(skill: "exa", action: "extract", params: {urls: "https://docs.exa.ai/reference/search,https://exa.ai/blog/neural-search"})
+action: extract
+params: {urls: "https://docs.exa.ai/reference/search"}
+```
+
+Multiple URLs:
+```
+action: extract
+params: {urls: "https://example.com/page1,https://example.com/page2"}
 ```
 
 ### find_similar
-Find pages similar to a given URL. Great for discovering related content.
+Find pages similar to a URL.
 
-**Parameters:**
-- `url` (required): URL to find similar pages for
-- `num_results` (optional): Number of results, default 10
-- `include_text` (optional): Include content, default `true`
+```
+action: find_similar
+params: {url: "https://anthropic.com/claude"}
+```
 
-**Example:**
-```
-use-skill(skill: "exa", action: "find_similar", params: {url: "https://anthropic.com/claude"})
-```
+## Defaults
+
+| Parameter | Default | Override for |
+|-----------|---------|--------------|
+| `num_results` | 5 | More results |
+| `include_text` | false | Page content |
+| `livecrawl` | never | Fresh content (`fallback`, `always`) |
 
 ## Search Types
 
-- **auto** (recommended): Let Exa choose the best approach
-- **neural**: Semantic/meaning-based search—best for niche, conceptual queries
-- **keyword**: Traditional keyword matching—best for specific terms, names
-
-## Tips
-
-- **Always use `livecrawl: "always"`** for fresh content
-- **Exa excels at semantic search** - natural language queries work great
-- **Use `search_urls` first** if you just need to find pages, then `extract` for specific ones
-- **Neural search** is best for "how to", "best practices", conceptual queries
-- **Keyword search** is better for specific product names, error messages, exact phrases
-
-## Pricing
-
-Exa charges per request:
-- Search: ~$0.003/request (URLs only) or ~$0.004/request (with content)
-- Contents/Extract: ~$0.001/URL
-
-## Full API Docs
-
-https://docs.exa.ai
+- **auto** (default): Let Exa choose
+- **neural**: Concepts, "how to", research
+- **keyword**: Names, error messages, exact terms
