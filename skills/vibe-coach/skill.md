@@ -29,20 +29,47 @@ actions:
 
 # Vibe Coach
 
-Domain-driven thinking. Discover entities, build shared vocabulary, visualize with diagrams.
+Structured thinking patterns for clearer communication. Use these when you need to help users think through decisions, understand domains, or compare options.
 
 ---
 
-## The Process
+## 1. Comparisons
 
-### 1. Discovery
-Ask open questions:
-- What problem does this solve?
-- What are the key *nouns*? (these become entities)
-- What *verbs* connect them? (these become relationships)
+**When:** User asks "which is better?", "should I use X or Y?", "what's the difference?"
 
-### 2. Glossary
-Build a table. One row per entity:
+**Format:** Items as columns, criteria as rows.
+
+| | PostgreSQL | MongoDB | SQLite |
+|---|---|---|---|
+| **Best for** | Complex queries, transactions | Flexible schemas, documents | Embedded, single-user |
+| **Scaling** | Vertical + read replicas | Horizontal sharding | Single file |
+| **Schema** | Strict, migrations required | Flexible, schema-optional | Strict |
+| **Hosting** | Supabase, RDS, self-host | Atlas, self-host | Local file |
+
+**Not:** Pros/cons lists. Those don't help you choose.
+
+**Pattern:**
+```
+|  | Option A | Option B | Option C |
+|---|---|---|---|
+| **Criterion 1** | value | value | value |
+| **Criterion 2** | value | value | value |
+```
+
+---
+
+## 2. Domain Modeling
+
+**When:** Starting a project, refactoring, onboarding, or feeling lost in complexity.
+
+### Process
+
+1. **Discover** - What are the nouns? What verbs connect them?
+2. **Define** - One glossary entry per entity
+3. **Diagram** - Visualize relationships
+4. **Document** - Record decisions
+
+### Glossary
 
 | Entity | Definition |
 |--------|------------|
@@ -50,10 +77,7 @@ Build a table. One row per entity:
 | **Episodes** | A single audio file within a podcast |
 | **Subscriptions** | A user following a podcast |
 
-**Rules:** Use domain language, not jargon. One term per concept.
-
-### 3. Map
-Visualize with Mermaid. Stadium shapes, plain English verbs:
+### Diagram
 
 ```mermaid
 %%{init: {'theme': 'dark', 'themeVariables': { 'fontSize': '14px', 'fontFamily': 'ui-monospace, monospace', 'lineColor': '#6b7280', 'primaryTextColor': '#f3f4f6' }}}%%
@@ -77,112 +101,81 @@ flowchart LR
     linkStyle 3 stroke:#f59e0b,stroke-width:2px
 ```
 
-### 4. Document Decisions
+**Colors:** One per entity. Use only when referencing that entity.
 
-| Decision | Rationale | Date |
-|----------|-----------|------|
-| Queue is per-user | Users have independent play queues | 2024-12 |
-| Episodes belong to one Podcast | No cross-posting | 2024-12 |
+**Shapes:** Stadium `(["Label"])` with emoji prefix.
+
+**Verbs:** Plain English — "have", "create", "belong to".
 
 ---
 
-## Visual Language
+## 3. Decision Trees
 
-### Colors
-Assign one color per entity. Use that color **only when referencing that entity**:
-- Diagram node fill/stroke
-- Table header (for entity field tables)
-- Relationship underlines
+**When:** User needs to choose between paths based on conditions.
 
-### Entity Detail Format
+```
+Need to FIND information or discover URLs?
+  → Use search
 
-## 🎙️ Podcasts
+Have specific URLs to read content from?
+  → Use extract
+     If JS-heavy or extract fails → Use browser
+```
 
-<div style="margin-left:2em; font-size:.9em;">
-↳ Subscribed to by <span style="text-decoration:underline; text-decoration-color:#10b981; text-decoration-thickness:2px; text-underline-offset:2px;">Users</span><br>
-↳ Have many <span style="text-decoration:underline; text-decoration-color:#3b82f6; text-decoration-thickness:2px; text-underline-offset:2px;">Episodes</span>
-</div>
-
-<table style="border-collapse:separate; border-spacing:0; font-size:90%; margin-top:1em;">
-<tr style="background:#4c1d95; color:#f3f4f6;">
-  <th style="border:1px solid #a78bfa; border-right:none; padding:5px; border-top-left-radius:8px;">Field</th>
-  <th style="border:1px solid #a78bfa; border-right:none; padding:5px;">Example</th>
-  <th style="border:1px solid #a78bfa; padding:5px; border-top-right-radius:8px;">Type</th>
-</tr>
-<tr>
-  <td style="border:1px solid #a78bfa; border-top:none; border-right:none; padding:5px;"><b>id</b></td>
-  <td style="border:1px solid #a78bfa; border-top:none; border-right:none; padding:5px;"><code>pod_123</code></td>
-  <td style="border:1px solid #a78bfa; border-top:none; padding:5px;"><code>string</code></td>
-</tr>
-<tr>
-  <td style="border:1px solid #a78bfa; border-top:none; border-right:none; padding:5px; border-bottom-left-radius:8px;"><b>title</b></td>
-  <td style="border:1px solid #a78bfa; border-top:none; border-right:none; padding:5px;"><code>The Daily</code></td>
-  <td style="border:1px solid #a78bfa; border-top:none; padding:5px; border-bottom-right-radius:8px;"><code>string</code></td>
-</tr>
-</table>
-
-### Planned vs Built
-
-Dashed = planned. Solid = built.
+Or as a diagram:
 
 ```mermaid
 %%{init: {'theme': 'dark', 'themeVariables': { 'fontSize': '14px', 'fontFamily': 'ui-monospace, monospace', 'primaryTextColor': '#f3f4f6' }}}%%
-flowchart LR
-    Built(["✅ Built"]) -.-> Planned(["📋 Planned"])
+flowchart TD
+    Start(["What do you need?"]) --> Find{"Find info?"}
+    Find -->|Yes| Search(["🔍 Search"])
+    Find -->|No| Have{"Have URLs?"}
+    Have -->|Yes| Extract(["📄 Extract"])
+    Have -->|No| Search
+    Extract -->|Fails| Browser(["🌐 Browser"])
     
-    style Built fill:#4c1d95,stroke:#a78bfa,stroke-width:2px,color:#f3f4f6
-    style Planned fill:#4c1d95,stroke:#a78bfa,stroke-width:2px,stroke-dasharray:5 5,color:#f3f4f6
+    style Start fill:#374151,stroke:#9ca3af,stroke-width:2px,color:#f3f4f6
+    style Find fill:#1a1a2e,stroke:#6b7280,stroke-width:2px,color:#f3f4f6
+    style Have fill:#1a1a2e,stroke:#6b7280,stroke-width:2px,color:#f3f4f6
+    style Search fill:#064e3b,stroke:#10b981,stroke-width:2px,color:#d1fae5
+    style Extract fill:#4c1d95,stroke:#a78bfa,stroke-width:2px,color:#f3f4f6
+    style Browser fill:#78350f,stroke:#f59e0b,stroke-width:2px,color:#fef3c7
 ```
 
 ---
 
-## Principles
+## 4. Glossary Tables
+
+**When:** Introducing terminology, onboarding, or clarifying concepts.
+
+| Term | Definition |
+|------|------------|
+| **Skill** | A capability you connect to (Todoist, YouTube) |
+| **Agent** | An AI assistant that uses skills (Claude, Cursor) |
+| **Activity** | Record of an agent using a skill |
+
+---
+
+## Visual Principles
 
 | Principle | Why |
 |-----------|-----|
-| **Stadium shapes** | `(["Label"])` — softer than rectangles |
-| **Emoji prefix** | Visual scanning |
-| **Plain English verbs** | "have", "create" — not "1:N" |
-| **Link colors match source** | Trace the flow visually |
+| **Tables over prose** | Scannable, comparable |
+| **Diagrams confirm understanding** | If you can't draw it, you don't get it |
 | **Dark mode** | Dark fills, bright strokes, light text |
-| **Example before type** | Show concrete values first |
-| **Plural names** | Podcasts not Podcast |
+| **Concrete before abstract** | Example before type |
+| **One color per entity** | Consistency creates vocabulary |
 
 ## Avoid
 
+- Prose when a table works
+- Pros/cons lists for comparisons
 - `erDiagram` — use `flowchart`
-- Sharp rectangles — use stadium shapes
+- Sharp rectangles — use stadium `(["..."])`
 - `1:N` notation — use verbs
-- Singular entity names
-- Plain markdown tables for entities — use styled HTML
-- Type before Example
-
----
-
-## Mermaid Reference
-
-**Dark mode init:**
-```
-%%{init: {'theme': 'dark', 'themeVariables': { 'fontSize': '14px', 'fontFamily': 'ui-monospace, monospace', 'lineColor': '#6b7280', 'primaryTextColor': '#f3f4f6' }}}%%
-```
-
-**Stadium shape:** `Name(["📦 Label"])`
-
-**Node style:** `style Name fill:#DARK,stroke:#BRIGHT,stroke-width:2px,color:#LIGHT`
-
-**Dashed:** `stroke-dasharray:5 5`
-
-**Link color:** `linkStyle 0 stroke:#COLOR,stroke-width:2px`
 
 ---
 
 ## Output
 
-Use the `render` action to save the domain document as markdown.
-
-A complete document includes:
-1. Overview paragraph
-2. Glossary table
-3. Relationship diagram
-4. Entity details (fields, relationships)
-5. Decisions log
+Use the `render` action to save structured documents as markdown.
