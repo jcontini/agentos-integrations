@@ -12,23 +12,39 @@ requires:
   - swift    # Pre-installed on macOS
   - osascript  # Pre-installed on macOS
 
-settings:
-  default_calendar:
-    label: Default Calendar
-    description: Calendar name for new events (leave empty for system default)
-    type: select
-    options_from: list_calendars
-    default: ""
-
 actions:
   list_calendars:
-    description: List all available calendars
+    description: List all available calendars with colors
     run: |
       osascript << 'EOF'
+      on clamp(val)
+        if val > 255 then return 255
+        if val < 0 then return 0
+        return val
+      end clamp
+      
+      on rgbToHex(r, g, b)
+        -- Convert 16-bit RGB (0-65535) to 8-bit hex
+        set r8 to my clamp(round (r / 257))
+        set g8 to my clamp(round (g / 257))
+        set b8 to my clamp(round (b / 257))
+        set hexChars to "0123456789ABCDEF"
+        set hexColor to "#"
+        repeat with val in {r8, g8, b8}
+          set hi to (val div 16) + 1
+          set lo to (val mod 16) + 1
+          set hexColor to hexColor & character hi of hexChars & character lo of hexChars
+        end repeat
+        return hexColor
+      end rgbToHex
+      
       tell application "Calendar"
         set calList to {}
         repeat with cal in calendars
-          set end of calList to "{\"name\":\"" & name of cal & "\"}"
+          set calName to name of cal
+          set calColor to color of cal
+          set hexColor to my rgbToHex(item 1 of calColor, item 2 of calColor, item 3 of calColor)
+          set end of calList to "{\"name\":\"" & calName & "\",\"color\":\"" & hexColor & "\"}"
         end repeat
         set AppleScript's text item delimiters to ","
         return "[" & (calList as text) & "]"
@@ -288,7 +304,7 @@ actions:
         description: End date/time (defaults to 1 hour after start)
       calendar:
         type: string
-        description: Calendar name (uses default_calendar setting if not specified)
+        description: Calendar name (uses system default if not specified)
       location:
         type: string
         description: Event location
@@ -300,7 +316,7 @@ actions:
         default: "false"
         description: Create as all-day event
     run: |
-      CAL="${PARAM_CALENDAR:-$SETTING_DEFAULT_CALENDAR}"
+      CAL="${PARAM_CALENDAR:-}"
       cat << 'SWIFT' > /tmp/agentos_cal_create.swift
       import EventKit
       import Foundation
@@ -848,9 +864,3 @@ delete(uid: "ABC123:XYZ")
 - **Recurring events**: Updates/deletes only affect the single occurrence by default
 - **Time zones**: Uses system timezone automatically
 - **iCloud sync**: Changes sync automatically to iCloud/Google
-
-## Settings
-
-| Setting | Description |
-|---------|-------------|
-| `default_calendar` | Default calendar for new events when not specified |
