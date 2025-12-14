@@ -16,7 +16,8 @@ settings:
   default_calendar:
     label: Default Calendar
     description: Calendar name for new events (leave empty for system default)
-    type: string
+    type: select
+    options_from: list_calendars
     default: ""
 
 actions:
