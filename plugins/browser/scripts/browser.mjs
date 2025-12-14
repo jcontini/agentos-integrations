@@ -17,6 +17,7 @@ const text = process.env.PARAM_TEXT;
 const script = process.env.PARAM_SCRIPT;
 const waitMs = parseInt(process.env.PARAM_WAIT_MS || '1000', 10);
 const includeScreenshot = process.env.PARAM_SCREENSHOT === 'true';
+const headless = process.env.SETTING_HEADLESS !== 'false';
 const downloadsDir = process.env.AGENTOS_DOWNLOADS || join(homedir(), 'Downloads');
 
 // Collected diagnostics
@@ -26,7 +27,7 @@ const networkRequests = [];
 const networkErrors = [];
 
 async function run() {
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch({ headless });
   const context = await browser.newContext({
     viewport: { width: 1280, height: 800 }
   });

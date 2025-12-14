@@ -6,6 +6,13 @@ category: automation
 icon: material-symbols:web
 color: "#4285F4"
 
+settings:
+  headless:
+    label: Headless Mode
+    description: Run browser invisibly (off = you can watch the browser)
+    type: boolean
+    default: "true"
+
 requires:
   - name: node
     install:
