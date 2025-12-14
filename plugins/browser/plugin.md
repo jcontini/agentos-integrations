@@ -223,92 +223,107 @@ actions:
 
 # Browser
 
-Automate browser interactions with full diagnostic visibility. Captures console logs, network requests, and errors automatically.
+**⚡ Always start with `inspect`** — it's fast, cheap, and gives you everything: page structure, buttons, inputs, console logs, network requests.
 
-## Recommended Workflow
-
-**For debugging (low tokens):**
-1. `inspect` — Get page structure, buttons, inputs, console/network logs
-2. `console` — Focus on JavaScript errors
-3. `network` — Focus on failed API requests
-
-**For interaction:**
-1. `click` / `type` — Interact with elements (returns any errors)
-2. `get_text` — Verify content
-3. `evaluate` — Run custom JavaScript
-
-**Last resort (high tokens):**
-- `screenshot` — Only when visual verification is absolutely needed
-
-## Tools
-
-### inspect ⚡ (recommended)
-Get a diagnostic overview: headings, buttons, inputs, console logs, network activity.
+## Quick Start
 
 ```
 tool: inspect
-params: {url: "http://localhost:5173"}
+params: {url: "https://example.com"}
+```
+
+This returns structured data in seconds. Only use other tools after inspecting.
+
+## Tool Priority
+
+| Priority | Tool | Use when |
+|----------|------|----------|
+| 1️⃣ | `inspect` | **Always start here** — page overview, console, network |
+| 2️⃣ | `console` | Focus on JavaScript errors |
+| 2️⃣ | `network` | Focus on failed API calls |
+| 3️⃣ | `click` / `type` | Interact with elements |
+| 3️⃣ | `get_text` | Extract specific content |
+| 4️⃣ | `evaluate` | Run custom JavaScript |
+| ⚠️ | `get_html` | Full HTML (can timeout on heavy pages) |
+| ⚠️ | `screenshot` | Visual capture (expensive tokens) |
+
+## Tools
+
+### inspect ⚡ (start here)
+Page structure, buttons, inputs, console logs, network activity.
+
+```
+tool: inspect
+params: {url: "https://example.com"}
 ```
 
 ### console
-Get console logs and JavaScript errors.
+JavaScript console logs and errors.
 
 ```
 tool: console
-params: {url: "http://localhost:5173"}
+params: {url: "https://example.com"}
 ```
 
 ### network
-Get network requests and failed API calls.
+Network requests and failed API calls.
 
 ```
 tool: network
-params: {url: "http://localhost:5173"}
+params: {url: "https://example.com"}
 ```
 
 ### click
-Click an element.
+Click an element. Returns any console/network errors.
 
 ```
 tool: click
-params: {url: "http://localhost:5173", selector: "text=Plugins"}
+params: {url: "https://example.com", selector: "text=Submit"}
 ```
 
 ### type
-Type into an input.
+Type into an input field.
 
 ```
 tool: type
-params: {url: "http://localhost:5173", selector: "input[type='text']", text: "hello"}
+params: {url: "https://example.com", selector: "input[name='email']", text: "hello@example.com"}
 ```
 
 ### get_text
-Get text from elements.
+Extract text from elements.
 
 ```
 tool: get_text
-params: {url: "http://localhost:5173", selector: "h1"}
+params: {url: "https://example.com", selector: "h1"}
 ```
 
 ### evaluate
-Run JavaScript in the page.
+Run JavaScript in the page context.
 
 ```
 tool: evaluate
-params: {url: "http://localhost:5173", script: "document.title"}
+params: {url: "https://example.com", script: "document.title"}
 ```
 
-### screenshot 📸 (expensive)
-Capture a screenshot. Use sparingly.
+### get_html ⚠️
+Full HTML (can timeout on heavy pages — prefer inspect).
+
+```
+tool: get_html
+params: {url: "https://example.com", selector: "main"}
+```
+
+### screenshot ⚠️
+Capture screenshot (expensive in tokens — use sparingly).
 
 ```
 tool: screenshot
-params: {url: "http://localhost:5173"}
+params: {url: "https://example.com"}
 ```
 
 ## CSS Selectors
 
-- `text=Click me` — Element containing text (Playwright syntax)
+- `text=Click me` — Element containing text
 - `#id` — By ID
 - `.class` — By class
 - `button` — By tag
