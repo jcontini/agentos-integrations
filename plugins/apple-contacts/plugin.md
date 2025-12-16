@@ -5,6 +5,9 @@ description: Search, view, and manage macOS Contacts
 category: productivity
 icon: https://upload.wikimedia.org/wikipedia/en/a/ac/MacOS_Contacts_icon.png
 color: "#000000"
+
+triggers:
+  - asks about contacts, phone numbers, or email addresses
 platform: macos
 
 requires:

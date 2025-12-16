@@ -5,6 +5,9 @@ description: Open apps, URLs, files, and navigate your Mac file system
 category: productivity
 icon: https://upload.wikimedia.org/wikipedia/commons/b/b9/Finder_Icon_macOS_Tahoe.png
 color: "#1C8BF4"
+
+triggers:
+  - asks to open apps, files, URLs, or navigate folders
 platform: macos
 requires:
   - name: tree
@@ -12,10 +15,6 @@ requires:
       macos: brew install tree
       linux: sudo apt install -y tree
       windows: choco install tree -y
-
-permissions:
-  - automation:Finder
-  - automation:System Events
 
 helpers: |
   # Finder-specific helpers

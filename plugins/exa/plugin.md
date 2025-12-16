@@ -6,6 +6,9 @@ category: search
 icon: https://www.finsmes.com/wp-content/uploads/2024/07/exa.jpeg
 color: "#5436DA"
 
+triggers:
+  - needs web search or to extract content from URLs
+
 provides:
   web-search:
     action: search_urls

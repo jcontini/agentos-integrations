@@ -5,6 +5,9 @@ description: Read WhatsApp messages from local macOS database
 category: communication
 icon: https://cdn.simpleicons.org/whatsapp
 color: "#25D366"
+
+triggers:
+  - asks about WhatsApp messages or conversations
 platform: macos
 
 requires:

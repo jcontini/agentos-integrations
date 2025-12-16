@@ -6,6 +6,9 @@ category: productivity
 icon: https://cdn.simpleicons.org/linear
 color: "#5E6AD2"
 
+triggers:
+  - asks about issues, tickets, or project management
+
 auth:
   type: api_key
   header: Authorization
@@ -260,8 +263,34 @@ actions:
       extract: .data.issueUpdate
 
   # =============================================================================
-  # BLOCKING RELATIONSHIPS
+  # ISSUE RELATIONSHIPS
   # =============================================================================
+
+  add_related:
+    description: Mark two issues as related to each other
+    params:
+      issue_id:
+        type: string
+        required: true
+        description: UUID of the first issue
+      related_issue_id:
+        type: string
+        required: true
+        description: UUID of the related issue
+    graphql:
+      query: |
+        mutation($input: IssueRelationCreateInput!) {
+          issueRelationCreate(input: $input) {
+            success
+            issueRelation { id type }
+          }
+        }
+      variables:
+        input:
+          issueId: $PARAM_ISSUE_ID
+          relatedIssueId: $PARAM_RELATED_ISSUE_ID
+          type: related
+      extract: .data.issueRelationCreate
 
   add_blocking:
     description: Set issue A blocks issue B (A must complete before B can start)
@@ -339,6 +368,12 @@ Get your API key from: https://linear.app/settings/api
 2. `list_workflow_states(team_id: "...")` → Find the desired state ID
 3. `update_issue(id: "AGE-8", state_id: "...")`
 
+### Link related issues
+
+1. `get_issue(id: "AGE-8")` → Get issue UUID
+2. `get_issue(id: "AGE-6")` → Get other issue UUID  
+3. `add_related(issue_id: "...", related_issue_id: "...")`
+
 ### Set up blocking relationship
 
 1. `get_issue(id: "AGE-8")` → Get issue UUID
@@ -365,6 +400,7 @@ Get your API key from: https://linear.app/settings/api
 |------|---------|-----------------|
 | `create_issue` | Create new issue | team_id, title |
 | `update_issue` | Update issue | id |
+| `add_related` | Mark two issues as related | issue_id, related_issue_id |
 | `add_blocking` | A blocks B | blocker_id, blocked_id |
 | `remove_relation` | Remove relation | relation_id |
 

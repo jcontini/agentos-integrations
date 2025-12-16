@@ -6,6 +6,9 @@ category: automation
 icon: material-symbols:web
 color: "#4285F4"
 
+triggers:
+  - needs to inspect, click, or automate a webpage
+
 settings:
   headless:
     label: Headless Mode
