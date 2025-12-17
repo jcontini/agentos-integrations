@@ -1,12 +1,12 @@
 ---
-id: finder
-name: Finder
+id: macos
+name: macOS
 description: Open apps, URLs, files, and navigate your Mac file system
 category: productivity
-icon: https://upload.wikimedia.org/wikipedia/commons/b/b9/Finder_Icon_macOS_Tahoe.png
-color: "#1C8BF4"
+icon: https://cdn.simpleicons.org/apple
+color: "#000000"
 
-topics: [open apps, open files, open URLs, file navigation]
+topics: [open apps, open files, open URLs, file navigation, macOS]
 platform: macos
 requires:
   - name: tree
@@ -16,7 +16,7 @@ requires:
       windows: choco install tree -y
 
 helpers: |
-  # Finder-specific helpers
+  # macOS-specific helpers
   is_url() { [[ "$1" == http* ]] || [[ "$1" == maps://* ]]; }
   is_app() { [ -d "/Applications/$1.app" ] || [[ "$1" == *.app ]]; }
 
