@@ -223,6 +223,30 @@ actions:
         default: "1000"
         description: Time to wait after page load (ms)
     run: browser
+
+  run_flow:
+    description: |
+      Execute a sequence of browser actions with OS-level mouse/keyboard input.
+      Perfect for recording demo videos - all interactions are visible to screen recorders.
+      Actions are executed sequentially. Use CSS selectors to target elements.
+    params:
+      actions:
+        type: array
+        required: true
+        description: |
+          Array of actions to perform. Each action has a type and parameters:
+          - goto: {action: "goto", url: "https://..."}
+          - wait: {action: "wait", ms: 1000}
+          - wait_for: {action: "wait_for", selector: ".loaded", timeout_ms: 5000}
+          - click: {action: "click", selector: "button.submit", duration_ms: 500}
+          - double_click: {action: "double_click", selector: ".item"}
+          - hover: {action: "hover", selector: ".menu", hover_ms: 500}
+          - type: {action: "type", selector: "input[name='email']", text: "hello@example.com", delay_ms: 50}
+          - scroll: {action: "scroll", direction: "down", amount: 300}
+          - scroll_to: {action: "scroll_to", selector: "#section"}
+          - key: {action: "key", key: "Enter"}
+          - key_combo: {action: "key_combo", keys: ["cmd", "shift", "p"]}
+    run: browser
 ---
 
 # Browser
