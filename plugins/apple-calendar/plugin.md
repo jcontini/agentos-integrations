@@ -431,7 +431,7 @@ actions:
       swift /tmp/agentos_cal_create.swift "$PARAM_TITLE" "$PARAM_START" "${PARAM_END:-}" "$CAL" "${PARAM_LOCATION:-}" "${PARAM_NOTES:-}" "${PARAM_ALL_DAY:-false}"
 
   update:
-    description: Update an existing event (only specify fields you want to change)
+    description: Update an existing event
     params:
       uid:
         type: string

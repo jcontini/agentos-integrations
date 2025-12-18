@@ -63,7 +63,7 @@ settings:
 actions:
   search:
     readonly: true
-    description: Search the web with optional content extraction. Use include_text=true only when you need page content.
+    description: Web search with optional content extraction
     params:
       query:
         type: string
@@ -118,7 +118,7 @@ actions:
 
   search_urls:
     readonly: true
-    description: Quick search returning just URLs and titles (fastest, cheapest)
+    description: Quick search returning URLs and titles
     params:
       query:
         type: string
@@ -144,7 +144,7 @@ actions:
 
   extract:
     readonly: true
-    description: Extract content from specific URLs (use after search_urls to get full content)
+    description: Extract content from URLs
     params:
       urls:
         type: string
