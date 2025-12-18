@@ -73,6 +73,16 @@ flowchart LR
     linkStyle 5 stroke:#10b981,stroke-width:2px
 ```
 
+| Entity | Description |
+|--------|-------------|
+| **Sources** | Repositories that provide plugins (GitHub, local folder) |
+| **Plugins** | Integrations with apps and APIs |
+| **Agents** | AI assistants (Claude, Cursor, Windsurf) |
+| **Actions** | Operations a plugin can perform |
+| **Activities** | Log of every action execution |
+| **Accounts** | Named credentials (Personal, Work) |
+| **Credentials** | API keys, tokens, connection strings |
+
 ### Plugin Lifecycle
 
 ```mermaid
@@ -95,14 +105,14 @@ stateDiagram-v2
 
 ### Actions
 
-Operations a plugin can perform:
+Operations a plugin can perform. Two modes:
 
-| Field | Description |
-|-------|-------------|
-| `readonly: true` | Safe to call without confirmation |
-| `readonly: false` | Requires `confirmAction: true` to execute |
+| Mode | When | AI Behavior |
+|------|------|-------------|
+| `readonly: true` | Read operations | Executes immediately |
+| `readonly: false` | Write operations | Shows preview, requires `confirmAction: true` |
 
-Naming: `get_*`, `create_*`, `update_*`, `delete_*`, `search`
+Naming convention: `get_*`, `create_*`, `update_*`, `delete_*`, `search`
 
 ### Accounts
 
