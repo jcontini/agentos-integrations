@@ -12,14 +12,12 @@ auth:
   header: Authorization
   prefix: "Bearer "
 
-requires:
-  - curl  # Usually pre-installed
-  - jq    # Usually pre-installed on macOS
+# No shell dependencies - all actions use secure REST executor
 
 actions:
   get_tasks:
     readonly: true
-    description: List tasks, optionally filtered by today/overdue/project
+    description: List tasks with optional filters. Use parent_id to get subtasks.
     params:
       filter:
         type: string
@@ -27,30 +25,28 @@ actions:
       project_id:
         type: string
         description: Filter by project ID
+      parent_id:
+        type: string
+        description: Filter by parent task ID (to get subtasks)
     rest:
       method: GET
       url: https://api.todoist.com/rest/v2/tasks
       query:
         filter: $PARAM_FILTER
         project_id: $PARAM_PROJECT_ID
+        parent_id: $PARAM_PARENT_ID
 
   get_task:
     readonly: true
-    description: Get a single task by ID, including its subtasks
+    description: Get a single task by ID. Use get_tasks(parent_id) for subtasks.
     params:
       id:
         type: string
         required: true
         description: Task ID
-    run: |
-      echo "=== Task ==="
-      curl -s "https://api.todoist.com/rest/v2/tasks/$PARAM_ID" \
-        -H "Authorization: Bearer $AUTH_TOKEN" | jq .
-      echo ""
-      echo "=== Subtasks ==="
-      curl -s "https://api.todoist.com/rest/v2/tasks?parent_id=$PARAM_ID" \
-        -H "Authorization: Bearer $AUTH_TOKEN" | \
-      jq -r '.[] | "  - [\(.id)] \(.content) | Due: \(.due.date // "none")"'
+    rest:
+      method: GET
+      url: https://api.todoist.com/rest/v2/tasks/$PARAM_ID
 
   create_task:
     description: Create a new task (AI-created tasks get "AI" label)
@@ -166,9 +162,9 @@ actions:
 
 Personal task management - create, list, complete, update, delete tasks.
 
-## Requirements
+## Security
 
-This plugin requires `curl` and `jq` (usually pre-installed on macOS).
+This plugin uses AgentOS secure REST executor. Credentials are never exposed to scripts - AgentOS injects them directly into API requests.
 
 ## Tools
 
@@ -178,16 +174,18 @@ List tasks with optional filtering.
 **Parameters:**
 - `filter` (optional): Filter like "today", "overdue", "7 days"
 - `project_id` (optional): Filter by project ID
+- `parent_id` (optional): Filter by parent task ID (to get subtasks)
 
 **Examples:**
 ```
 use-plugin(plugin: "todoist", tool: "get_tasks")
 use-plugin(plugin: "todoist", tool: "get_tasks", params: {filter: "today"})
 use-plugin(plugin: "todoist", tool: "get_tasks", params: {filter: "overdue"})
+use-plugin(plugin: "todoist", tool: "get_tasks", params: {parent_id: "123456"})  # Get subtasks
 ```
 
 ### get_task
-Get a task by ID, including any subtasks.
+Get a single task by ID.
 
 **Parameters:**
 - `id` (required): Task ID
@@ -196,6 +194,8 @@ Get a task by ID, including any subtasks.
 ```
 use-plugin(plugin: "todoist", tool: "get_task", params: {id: "123456"})
 ```
+
+**Getting subtasks:** Use `get_tasks(parent_id: "123456")` to fetch subtasks of a task.
 
 ### create_task
 Create a new task. AI-created tasks are automatically labeled with "AI".
