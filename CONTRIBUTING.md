@@ -2,13 +2,37 @@
 
 This guide covers everything you need to build, test, and contribute AgentOS plugins.
 
+## 🔒 Security First
+
+**All plugins must use AgentOS secure executors.** This is enforced by pre-commit hooks.
+
+| Executor | Use For |
+|----------|---------|
+| `rest:` | REST API calls |
+| `graphql:` | GraphQL API calls |
+| `run:` | Local operations only (no network, no credentials) |
+
+❌ **Never** use `$AUTH_TOKEN` or `curl` with auth headers in scripts.
+✅ **Always** use `rest:` or `graphql:` blocks for API calls.
+
+AgentOS injects credentials automatically — plugins never see credential values.
+
+### Setup Security Hook
+
+```bash
+git config core.hooksPath .githooks
+```
+
+This blocks commits that contain security vulnerabilities.
+
 ## Quick Start
 
 1. Fork this repo
-2. Set your fork as the plugins source in AgentOS → Settings → Developer
-3. Create your plugin in `plugins/{id}/plugin.md`
-4. Test locally (changes hot-reload)
-5. Submit a PR
+2. **Enable the security hook**: `git config core.hooksPath .githooks`
+3. Set your fork as the plugins source in AgentOS → Settings → Developer
+4. Create your plugin in `plugins/{id}/plugin.md`
+5. Test locally (changes hot-reload)
+6. Submit a PR
 
 ## Plugin Structure
 
@@ -96,7 +120,7 @@ auth:
   help_url: https://...      # Where users get their key
 ```
 
-The token is available as `$AUTH_TOKEN` in your scripts.
+**AgentOS automatically injects the token** into `rest:` and `graphql:` blocks. You never need to handle credentials in your plugin code.
 
 ### Connection String (Databases)
 
@@ -108,13 +132,7 @@ auth:
   help_url: https://...
 ```
 
-Connection strings contain everything needed:
-```
-postgresql://user:password@host:port/database
-mysql://user:password@host:port/database
-```
-
-Available as `$AUTH_TOKEN`. Users can add multiple accounts (staging, production, etc.) - multi-account is handled at the AgentOS level for all auth types.
+Connection strings are injected by AgentOS into terminal-based operations. Users can add multiple accounts (staging, production, etc.) - multi-account is handled at the AgentOS level for all auth types.
 
 ### OAuth (Future)
 
@@ -122,33 +140,43 @@ OAuth support is planned for services requiring user authorization flows.
 
 ## Action Types
 
-### REST API (`api:`)
+### REST API (`rest:`) ⭐ Recommended
 
-The simplest way to call APIs. Auth headers are added automatically.
+The simplest and most secure way to call REST APIs. Auth headers are injected automatically.
 
 ```yaml
 actions:
   get_tasks:
     readonly: true
-    api:
+    rest:
       method: GET
       url: https://api.example.com/tasks
   
   get_task:
     readonly: true
-    api:
+    rest:
       method: GET
       url: https://api.example.com/tasks/$PARAM_ID
   
+  create_task:
+    rest:
+      method: POST
+      url: https://api.example.com/tasks
+      body:
+        title: $PARAM_TITLE
+        priority: $PARAM_PRIORITY
+  
   delete_task:
-    api:
+    rest:
       method: DELETE
       url: https://api.example.com/tasks/$PARAM_ID
 ```
 
 Methods: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`
 
-### GraphQL API (`graphql:`)
+Body values are automatically type-coerced (integers stay integers, booleans stay booleans).
+
+### GraphQL API (`graphql:`) ⭐ Recommended
 
 For GraphQL APIs, set `type: graphql` at the top level:
 
@@ -176,18 +204,24 @@ actions:
       extract: .data.issue
 ```
 
-### Shell Scripts (`run:`)
+### Shell Scripts (`run:`) — Local Only
 
-For custom logic when `api:` or `graphql:` aren't enough:
+For **local operations only**. Never use for API calls.
 
 ```yaml
 actions:
-  search:
+  open_folder:
     readonly: true
     run: |
-      curl -s "https://api.example.com/search?q=$PARAM_QUERY" \
-        -H "Authorization: Bearer $AUTH_TOKEN" | jq .
+      open "$PARAM_PATH"
+  
+  count_files:
+    readonly: true
+    run: |
+      find "$PARAM_DIR" -type f | wc -l
 ```
+
+⚠️ **`run:` blocks cannot make authenticated network requests.** Use `rest:` or `graphql:` instead.
 
 ## AI-First Design
 
@@ -303,9 +337,10 @@ Auto-injected into `run:` scripts:
 | Variable | Description |
 |----------|-------------|
 | `PARAM_{NAME}` | Each param value (uppercased) |
-| `AUTH_TOKEN` | Credential if auth configured |
 | `SETTING_{NAME}` | Plugin settings (uppercased) |
 | `PLUGIN_DIR` | Path to plugin folder |
+
+**Note:** `AUTH_TOKEN` is intentionally NOT exposed to scripts. Credentials are injected directly into `rest:` and `graphql:` blocks by AgentOS core.
 
 Plugins should store any data in `$PLUGIN_DIR`. This keeps plugins sandboxed and allows AgentOS to manage plugin data centrally.
 
@@ -322,19 +357,21 @@ require_dir "path"   # Error if dir doesn't exist
 
 ## The `helpers:` Block
 
-Define shared functions for multiple actions:
+Define shared functions for multiple **local** operations:
 
 ```yaml
 helpers: |
-  call_api() {
-    curl -s -H "Authorization: Bearer $AUTH_TOKEN" "$1"
+  format_output() {
+    jq -r '.items[] | "\(.name): \(.value)"'
   }
 
 actions:
-  get_items:
+  list_files:
     readonly: true
-    run: call_api "https://api.example.com/items" | jq .
+    run: ls -la "$PARAM_DIR" | format_output
 ```
+
+⚠️ **Don't use helpers for API calls.** Use `rest:` or `graphql:` blocks instead.
 
 ## Settings Types
 
@@ -398,28 +435,30 @@ REST/GraphQL plugins automatically pass through upstream status codes.
 
 - Use `get_*` for retrieval actions
 - Mark read-only actions with `readonly: true`
-- Use native `api:` or `graphql:` blocks when possible
-- Use `helpers:` for shared logic
+- **Use `rest:` or `graphql:` blocks for all API calls**
+- Use `run:` only for local operations
 - Return JSON for structured data
 - Keep action names short (under 15 chars)
 - Omit `auth:` if not needed
+- Enable the security hook: `git config core.hooksPath .githooks`
 
 ### Don't
 
-- Suppress stderr (`2>/dev/null` hides errors)
-- Use complex inline scripts (use helpers or scripts/)
-- Hardcode paths (use env vars)
-- Use `list_*` naming (use `get_*`)
+- ❌ Use `$AUTH_TOKEN` in scripts (blocked by pre-commit hook)
+- ❌ Use `curl` with auth headers (blocked by pre-commit hook)
+- ❌ Suppress stderr (`2>/dev/null` hides errors)
+- ❌ Use `list_*` naming (use `get_*`)
+- ❌ Make network calls from `run:` blocks
 
 ## Example Plugins
 
 | Plugin | Type | Good for |
 |--------|------|----------|
 | `linear/` | GraphQL | Declarative GraphQL API |
-| `todoist/` | REST + shell | Mixed approach |
-| `exa/` | Shell | API via curl scripts |
-| `macos/` | Shell | System integration |
-| `browser/` | Shell + scripts/ | Complex with external scripts |
+| `todoist/` | REST | Secure REST API |
+| `exa/` | REST | Secure REST API with type coercion |
+| `macos/` | Shell | Local system integration |
+| `browser/` | Shell + scripts/ | Complex local operations |
 
 ## Testing Locally
 

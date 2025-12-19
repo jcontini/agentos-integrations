@@ -15,8 +15,9 @@ NC='\033[0m' # No Color
 
 echo "🔒 Running security checks..."
 
-# Get list of staged files (only plugin markdown files)
-STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.md$' || true)
+# Get list of staged plugin files (only plugin.md files in plugins/ directory)
+# Excludes documentation like CONTRIBUTING.md, README.md
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '^plugins/.*/plugin\.md$' || true)
 
 if [ -z "$STAGED_FILES" ]; then
     echo -e "${GREEN}✓ No plugin files to check${NC}"
