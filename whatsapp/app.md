@@ -5,6 +5,10 @@ description: Read WhatsApp messages from local macOS database
 icon: https://cdn.simpleicons.org/whatsapp
 color: "#25D366"
 
+website: https://www.whatsapp.com/
+privacy_url: https://www.whatsapp.com/legal/privacy-policy
+terms_url: https://www.whatsapp.com/legal/terms-of-service
+
 tags: [WhatsApp, WhatsApp messages]
 platform: macos
 
@@ -174,8 +178,8 @@ List recent WhatsApp conversations with preview.
 
 **Example:**
 ```
-use-plugin(plugin: "whatsapp", tool: "get_conversations")
-use-plugin(plugin: "whatsapp", tool: "get_conversations", params: {limit: 10})
+use-app(app: "whatsapp", tool: "get_conversations")
+use-app(app: "whatsapp", tool: "get_conversations", params: {limit: 10})
 ```
 
 ### get_messages
@@ -188,9 +192,9 @@ Get messages, optionally filtered by contact or time range.
 
 **Examples:**
 ```
-use-plugin(plugin: "whatsapp", tool: "get_messages")
-use-plugin(plugin: "whatsapp", tool: "get_messages", params: {contact: "Mom"})
-use-plugin(plugin: "whatsapp", tool: "get_messages", params: {days: 7, limit: 50})
+use-app(app: "whatsapp", tool: "get_messages")
+use-app(app: "whatsapp", tool: "get_messages", params: {contact: "Mom"})
+use-app(app: "whatsapp", tool: "get_messages", params: {days: 7, limit: 50})
 ```
 
 ### get_unread
@@ -198,7 +202,7 @@ Get all unread messages across all conversations.
 
 **Example:**
 ```
-use-plugin(plugin: "whatsapp", tool: "get_unread")
+use-app(app: "whatsapp", tool: "get_unread")
 ```
 
 ### search
@@ -210,7 +214,7 @@ Search message content.
 
 **Example:**
 ```
-use-plugin(plugin: "whatsapp", tool: "search", params: {query: "dinner"})
+use-app(app: "whatsapp", tool: "search", params: {query: "dinner"})
 ```
 
 ### get_today
@@ -218,12 +222,12 @@ Get all messages from today.
 
 **Example:**
 ```
-use-plugin(plugin: "whatsapp", tool: "get_today")
+use-app(app: "whatsapp", tool: "get_today")
 ```
 
 ## Notes
 
-- This is **read-only** - you cannot send messages through this plugin
+- This is **read-only** - you cannot send messages through this app
 - Group chats show sender names in the `sender` field
 - Phone numbers in the database use format like `13125551234` (no + prefix)
 - Messages are returned newest first

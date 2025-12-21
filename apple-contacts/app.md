@@ -5,6 +5,10 @@ description: Search, view, and manage macOS Contacts
 icon: https://upload.wikimedia.org/wikipedia/en/a/ac/MacOS_Contacts_icon.png
 color: "#000000"
 
+website: https://www.apple.com/macos/
+privacy_url: https://www.apple.com/legal/privacy/
+terms_url: https://www.apple.com/legal/internet-services/terms/site.html
+
 tags: [contacts, phone numbers, email addresses]
 platform: macos
 

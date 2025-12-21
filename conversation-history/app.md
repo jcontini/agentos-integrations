@@ -29,7 +29,7 @@ settings:
 
 helpers: |
   history() {
-    python3 "$PLUGIN_DIR/scripts/history.py" "$@"
+    python3 "$APP_DIR/scripts/history.py" "$@"
   }
 
 actions:
@@ -216,7 +216,7 @@ Use `format: "json"` for structured data with additional fields:
 
 ## Architecture
 
-This plugin is designed to be extensible:
+This app is designed to be extensible:
 
 - **Multi-agent**: Each agent (Cursor, Claude) has its own handler
 - **Multi-platform**: Paths configured for macOS, Linux, Windows

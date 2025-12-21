@@ -135,7 +135,7 @@ Web scraping and search with browser rendering. Handles JS-heavy sites that othe
 
 ## Security
 
-This plugin uses AgentOS secure REST executor. Credentials are never exposed to scripts.
+This app uses AgentOS secure REST executor. Credentials are never exposed to scripts.
 
 ## When to Use Firecrawl
 

@@ -175,7 +175,7 @@ Semantic web search and content extraction. Neural search finds content by meani
 
 ## Security
 
-This plugin uses AgentOS secure REST executor. Credentials are never exposed to scripts - AgentOS injects them directly into API requests.
+This app uses AgentOS secure REST executor. Credentials are never exposed to scripts - AgentOS injects them directly into API requests.
 
 ## Recommended Workflow
 

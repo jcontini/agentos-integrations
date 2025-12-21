@@ -1,8 +1,8 @@
-# agentOS Plugins
+# agentOS Apps
 
-Open-source plugin definitions for [agentOS](https://github.com/jcontini/agentos).
+Open-source app definitions for [agentOS](https://github.com/jcontini/agentos).
 
-Plugins teach AI agents how to use your apps and APIs — they're markdown files with configuration and documentation.
+Apps teach AI agents how to use your apps and APIs — they're markdown files with configuration and documentation.
 
 ## Core Concepts
 
@@ -11,16 +11,16 @@ Plugins teach AI agents how to use your apps and APIs — they're markdown files
 flowchart LR
     subgraph Container[" "]
         direction LR
-        Sources(["📦 Sources"]) -->|provide| Plugins(["⚡ Plugins"])
+        Sources(["📦 Sources"]) -->|provide| Apps(["⚡ Apps"])
         Agents(["🤖 Agents"]) -->|use| Actions(["⚙️ Actions"])
-        Plugins -->|define| Actions
+        Apps -->|define| Actions
         Actions -->|produce| Activities(["📋 Activities"])
-        Plugins -->|have| Credentials(["🔑 Credentials"])
+        Apps -->|have| Credentials(["🔑 Credentials"])
     end
     
     style Container fill:#1a1a2e,stroke:#4a4a6a,stroke-width:2px,rx:10,ry:10
     style Sources fill:#134e4a,stroke:#14b8a6,stroke-width:2px,color:#ccfbf1
-    style Plugins fill:#4c1d95,stroke:#a78bfa,stroke-width:2px,color:#f3f4f6
+    style Apps fill:#4c1d95,stroke:#a78bfa,stroke-width:2px,color:#f3f4f6
     style Agents fill:#78350f,stroke:#f59e0b,stroke-width:2px,color:#fef3c7
     style Actions fill:#7c2d12,stroke:#f97316,stroke-width:2px,color:#ffedd5
     style Activities fill:#374151,stroke:#9ca3af,stroke-width:2px,color:#f3f4f6
@@ -35,14 +35,14 @@ flowchart LR
 
 | Entity | Description |
 |--------|-------------|
-| **Sources** | Repositories that provide plugins (GitHub, local folder) |
-| **Plugins** | Integrations with apps and APIs |
+| **Sources** | Repositories that provide apps (GitHub, local folder) |
+| **Apps** | Integrations with apps and APIs |
 | **Agents** | AI assistants (Claude, Cursor, Windsurf) |
-| **Actions** | Operations a plugin can perform |
+| **Actions** | Operations an app can perform |
 | **Activities** | Log of every action execution |
-| **Credentials** | API keys, tokens stored per plugin (supports multiple: Personal, Work) |
+| **Credentials** | API keys, tokens stored per app (supports multiple: Personal, Work) |
 
-### Plugin Lifecycle
+### App Lifecycle
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'darkMode': true, 'background': '#1a1a2e', 'fontSize': '12px', 'fontFamily': 'ui-monospace, monospace', 'primaryColor': '#4c1d95', 'primaryBorderColor': '#a78bfa', 'primaryTextColor': '#f3f4f6', 'lineColor': '#a78bfa', 'secondaryColor': '#4c1d95', 'tertiaryColor': '#2d2d4a' }}}%%
@@ -64,7 +64,7 @@ stateDiagram-v2
 
 ### Actions
 
-Operations a plugin can perform. Two modes:
+Operations an app can perform. Two modes:
 
 | Mode | When | AI Behavior |
 |------|------|-------------|
@@ -75,15 +75,15 @@ Naming convention: `get_*`, `create_*`, `update_*`, `delete_*`, `search`
 
 ### Credentials
 
-All plugins support multiple named credentials (Personal, Work, AgentOS, etc.). When multiple credentials exist for a plugin, the AI must specify which to use via the `account` parameter.
+All apps support multiple named credentials (Personal, Work, AgentOS, etc.). When multiple credentials exist for an app, the AI must specify which to use via the `account` parameter.
 
-## What's a Plugin?
+## What's an App?
 
-A plugin is a markdown file (`plugins/{id}/plugin.md`) with:
+An app is a markdown file (`apps/{id}/app.md`) with:
 - **YAML frontmatter** — metadata, auth config, action definitions
-- **Markdown body** — instructions the AI reads to use the plugin
+- **Markdown body** — instructions the AI reads to use the app
 
-Most plugins are just this single file. Complex plugins (like `browser/`) can include a `scripts/` folder for additional logic.
+Most apps are just this single file. Complex apps (like `browser/`) can include a `scripts/` folder for additional logic.
 
 ```yaml
 ---
@@ -116,18 +116,18 @@ actions:
 Instructions for AI go here...
 ```
 
-## Using Plugins
+## Using Apps
 
-1. Open agentOS → Plugins
-2. Browse and install a plugin
+1. Open agentOS → Apps
+2. Browse and install an app
 3. Add credentials if required
 4. AI agents can now use it via MCP
 
 ## Development Setup
 
 ```bash
-git clone https://github.com/agentos/agentos-plugins
-cd agentos-plugins
+git clone https://github.com/agentos/agentos-apps
+cd agentos-apps
 git config core.hooksPath .githooks
 ```
 
@@ -139,7 +139,7 @@ The last command enables security hooks that block commits containing:
 ## Contributing
 
 See **[CONTRIBUTING.md](CONTRIBUTING.md)** for the complete guide:
-- Plugin schema and all fields
+- App schema and all fields
 - Action types (REST, GraphQL, Shell)
 - Authentication options
 - AI-first design best practices

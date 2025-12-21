@@ -170,7 +170,7 @@ Personal task management - create, list, complete, update, delete tasks.
 
 ## Security
 
-This plugin uses AgentOS secure REST executor. Credentials are never exposed to scripts - AgentOS injects them directly into API requests.
+This app uses AgentOS secure REST executor. Credentials are never exposed to scripts - AgentOS injects them directly into API requests.
 
 ## Tools
 
@@ -184,10 +184,10 @@ List tasks with optional filtering.
 
 **Examples:**
 ```
-use-plugin(plugin: "todoist", tool: "get_tasks")
-use-plugin(plugin: "todoist", tool: "get_tasks", params: {filter: "today"})
-use-plugin(plugin: "todoist", tool: "get_tasks", params: {filter: "overdue"})
-use-plugin(plugin: "todoist", tool: "get_tasks", params: {parent_id: "123456"})  # Get subtasks
+use-app(app: "todoist", tool: "get_tasks")
+use-app(app: "todoist", tool: "get_tasks", params: {filter: "today"})
+use-app(app: "todoist", tool: "get_tasks", params: {filter: "overdue"})
+use-app(app: "todoist", tool: "get_tasks", params: {parent_id: "123456"})  # Get subtasks
 ```
 
 ### get_task
@@ -198,7 +198,7 @@ Get a single task by ID.
 
 **Example:**
 ```
-use-plugin(plugin: "todoist", tool: "get_task", params: {id: "123456"})
+use-app(app: "todoist", tool: "get_task", params: {id: "123456"})
 ```
 
 **Getting subtasks:** Use `get_tasks(parent_id: "123456")` to fetch subtasks of a task.
@@ -216,8 +216,8 @@ Create a new task. AI-created tasks are automatically labeled with "AI".
 
 **Examples:**
 ```
-use-plugin(plugin: "todoist", tool: "create_task", params: {content: "Buy groceries"})
-use-plugin(plugin: "todoist", tool: "create_task", params: {content: "Urgent meeting", priority: 4, due_string: "tomorrow"})
+use-app(app: "todoist", tool: "create_task", params: {content: "Buy groceries"})
+use-app(app: "todoist", tool: "create_task", params: {content: "Urgent meeting", priority: 4, due_string: "tomorrow"})
 ```
 
 ### update_task
@@ -232,7 +232,7 @@ Update an existing task. Uses POST method (not PUT - Todoist quirk).
 
 **Example:**
 ```
-use-plugin(plugin: "todoist", tool: "update_task", params: {id: "123456", due_string: "tomorrow"})
+use-app(app: "todoist", tool: "update_task", params: {id: "123456", due_string: "tomorrow"})
 ```
 
 ### complete_task / reopen_task
@@ -240,8 +240,8 @@ Mark task complete or reopen it.
 
 **Examples:**
 ```
-use-plugin(plugin: "todoist", tool: "complete_task", params: {id: "123456"})
-use-plugin(plugin: "todoist", tool: "reopen_task", params: {id: "123456"})
+use-app(app: "todoist", tool: "complete_task", params: {id: "123456"})
+use-app(app: "todoist", tool: "reopen_task", params: {id: "123456"})
 ```
 
 ### delete_task
@@ -249,7 +249,7 @@ Permanently delete a task.
 
 **Example:**
 ```
-use-plugin(plugin: "todoist", tool: "delete_task", params: {id: "123456"})
+use-app(app: "todoist", tool: "delete_task", params: {id: "123456"})
 ```
 
 ### get_projects / get_labels
@@ -257,8 +257,8 @@ List all projects or labels.
 
 **Examples:**
 ```
-use-plugin(plugin: "todoist", tool: "get_projects")
-use-plugin(plugin: "todoist", tool: "get_labels")
+use-app(app: "todoist", tool: "get_projects")
+use-app(app: "todoist", tool: "get_labels")
 ```
 
 ## ⚠️ Critical: Recurring Tasks

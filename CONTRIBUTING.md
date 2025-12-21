@@ -1,10 +1,10 @@
-# Contributing Plugins
+# Contributing Apps
 
-This guide covers everything you need to build, test, and contribute AgentOS plugins.
+This guide covers everything you need to build, test, and contribute AgentOS apps.
 
 ## 🔒 Security First
 
-**All plugins must use AgentOS secure executors.** This is enforced by pre-commit hooks.
+**All apps must use AgentOS secure executors.** This is enforced by pre-commit hooks.
 
 | Executor | Use For |
 |----------|---------|
@@ -15,7 +15,7 @@ This guide covers everything you need to build, test, and contribute AgentOS plu
 ❌ **Never** use `$AUTH_TOKEN` or `curl` with auth headers in scripts.
 ✅ **Always** use `rest:` or `graphql:` blocks for API calls.
 
-AgentOS injects credentials automatically — plugins never see credential values.
+AgentOS injects credentials automatically — apps never see credential values.
 
 ### Setup Security Hook
 
@@ -29,19 +29,19 @@ This blocks commits that contain security vulnerabilities.
 
 1. Fork this repo
 2. **Enable the security hook**: `git config core.hooksPath .githooks`
-3. Set your fork as the plugins source in AgentOS → Settings → Developer
-4. Create your plugin in `plugins/{id}/plugin.md`
+3. Set your fork as the apps source in AgentOS → Settings → Developer
+4. Create your app in `apps/{id}/app.md`
 5. Test locally (changes hot-reload)
 6. Submit a PR
 
-## Plugin Structure
+## App Structure
 
-Plugins live in `plugins/{id}/plugin.md` with YAML frontmatter + markdown body.
+Apps live in `apps/{id}/app.md` with YAML frontmatter + markdown body.
 
 ```yaml
 ---
-id: my-plugin
-name: My Plugin
+id: my-app
+name: My App
 description: What it does (one line)
 tags: [tasks, automation, api]
 icon: material-symbols:icon-name
@@ -97,7 +97,7 @@ actions:
       echo "Limit: $PARAM_LIMIT"
 ---
 
-# My Plugin
+# My App
 
 Instructions for AI go here...
 ```
@@ -106,7 +106,7 @@ Instructions for AI go here...
 
 ### No Auth Required
 
-If your plugin doesn't need authentication, simply **omit the `auth:` section entirely**.
+If your app doesn't need authentication, simply **omit the `auth:` section entirely**.
 
 ### API Key
 
@@ -120,7 +120,7 @@ auth:
   help_url: https://...      # Where users get their key
 ```
 
-**AgentOS automatically injects the token** into `rest:` and `graphql:` blocks. You never need to handle credentials in your plugin code.
+**AgentOS automatically injects the token** into `rest:` and `graphql:` blocks. You never need to handle credentials in your app code.
 
 ### Connection String (Databases)
 
@@ -272,7 +272,7 @@ Use short, standard names for better AI one-shot success:
 
 | ✅ Standard | ❌ Avoid | Why |
 |-------------|----------|-----|
-| `id` | `issue_id`, `task_id` | Universal, works across plugins |
+| `id` | `issue_id`, `task_id` | Universal, works across apps |
 | `query` | `searchQuery`, `q` | Clear intent |
 | `limit` | `maxResults`, `count` | Consistent pagination |
 | `offset` | `skip`, `start` | Consistent pagination |
@@ -328,7 +328,7 @@ recommends:
       macos: brew install jq
 ```
 
-Recommended dependencies are suggested but not required. Your plugin should work without them, just with reduced functionality.
+Recommended dependencies are suggested but not required. Your app should work without them, just with reduced functionality.
 
 ## Environment Variables
 
@@ -337,12 +337,12 @@ Auto-injected into `run:` scripts:
 | Variable | Description |
 |----------|-------------|
 | `PARAM_{NAME}` | Each param value (uppercased) |
-| `SETTING_{NAME}` | Plugin settings (uppercased) |
-| `PLUGIN_DIR` | Path to plugin folder |
+| `SETTING_{NAME}` | App settings (uppercased) |
+| `APP_DIR` | Path to app folder |
 
 **Note:** `AUTH_TOKEN` is intentionally NOT exposed to scripts. Credentials are injected directly into `rest:` and `graphql:` blocks by AgentOS core.
 
-Plugins should store any data in `$PLUGIN_DIR`. This keeps plugins sandboxed and allows AgentOS to manage plugin data centrally.
+Apps should store any data in `$APP_DIR`. This keeps apps sandboxed and allows AgentOS to manage app data centrally.
 
 ## Built-in Helpers
 
@@ -383,26 +383,26 @@ actions:
 | `enum` | Dropdown with `options` array |
 | `instructions` | Multiline text for AI |
 
-The `instructions` type lets users provide custom guidance for AI when using the plugin.
+The `instructions` type lets users provide custom guidance for AI when using the app.
 
-## Plugins with Scripts
+## Apps with Scripts
 
 For complex logic, use a `scripts/` folder:
 
 ```
-plugins/
+apps/
   browser/
-    plugin.md
+    app.md
     scripts/
       browser.mjs
 ```
 
-Reference via `$PLUGIN_DIR`:
+Reference via `$APP_DIR`:
 
 ```yaml
 actions:
   click:
-    run: node "$PLUGIN_DIR/scripts/browser.mjs" click "$PARAM_SELECTOR"
+    run: node "$APP_DIR/scripts/browser.mjs" click "$PARAM_SELECTOR"
 ```
 
 ## Icons
@@ -416,7 +416,7 @@ Browse Iconify icons: https://icon-sets.iconify.design/
 
 ## Status Codes
 
-AgentOS uses HTTP-style status codes. Your plugin doesn't set these - the system handles it:
+AgentOS uses HTTP-style status codes. Your app doesn't set these - the system handles it:
 
 | Status | Meaning |
 |--------|---------|
@@ -427,7 +427,7 @@ AgentOS uses HTTP-style status codes. Your plugin doesn't set these - the system
 | 429 | Rate limited |
 | 500 | Server error |
 
-REST/GraphQL plugins automatically pass through upstream status codes.
+REST/GraphQL apps automatically pass through upstream status codes.
 
 ## Best Practices
 
@@ -450,9 +450,9 @@ REST/GraphQL plugins automatically pass through upstream status codes.
 - ❌ Use `list_*` naming (use `get_*`)
 - ❌ Make network calls from `run:` blocks
 
-## Example Plugins
+## Example Apps
 
-| Plugin | Type | Good for |
+| App | Type | Good for |
 |--------|------|----------|
 | `linear/` | GraphQL | Declarative GraphQL API |
 | `todoist/` | REST | Secure REST API |
@@ -462,8 +462,8 @@ REST/GraphQL plugins automatically pass through upstream status codes.
 
 ## Testing Locally
 
-1. Fork the plugins repo
-2. Set your fork as plugins source in AgentOS Settings → Developer
+1. Fork the apps repo
+2. Set your fork as apps source in AgentOS Settings → Developer
 3. Changes hot-reload automatically
 
 ## Questions?

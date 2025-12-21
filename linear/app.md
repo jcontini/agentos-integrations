@@ -369,7 +369,7 @@ Full-featured Linear integration with blocking relationships, cycles, and full G
 
 ## Design Philosophy
 
-This plugin exposes Linear's GraphQL API directly. Operations that need IDs (like creating issues) require you to fetch those IDs first using list operations. This is intentional:
+This app exposes Linear's GraphQL API directly. Operations that need IDs (like creating issues) require you to fetch those IDs first using list operations. This is intentional:
 
 - **Explicit over implicit** - No hidden API calls
 - **AI-friendly** - The AI sees the full workflow

@@ -6,6 +6,10 @@ icon: https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/IMessage_logo.sv
 color: "#34C759"
 platform: macos
 
+website: https://support.apple.com/messages
+privacy_url: https://www.apple.com/legal/privacy/data/en/messages/
+terms_url: https://www.apple.com/legal/internet-services/terms/site.html
+
 tags: [text messages, iMessages, SMS]
 
 requires:
@@ -233,9 +237,9 @@ Get all messages from today.
 
 ## Notes
 
-- This is **read-only** - you cannot send messages through this plugin
+- This is **read-only** - you cannot send messages through this app
 - Phone numbers are stored in E.164 format: `+1XXXXXXXXXX`
-- Use the `apple-contacts` plugin to resolve phone numbers to names
+- Use the `apple-contacts` app to resolve phone numbers to names
 - Group chats show the group name in the `group_name` field
 - Messages are returned newest first
 - Media-only messages (images, videos) won't appear (no text content)

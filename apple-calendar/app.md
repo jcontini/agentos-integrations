@@ -6,6 +6,10 @@ icon: https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Apple_Calendar_%
 color: "#FF3B30"
 platform: macos
 
+website: https://www.apple.com/macos/
+privacy_url: https://www.apple.com/legal/privacy/
+terms_url: https://www.apple.com/legal/internet-services/terms/site.html
+
 tags: [calendar, schedule, meetings, availability]
 
 requires:

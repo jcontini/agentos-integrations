@@ -80,13 +80,13 @@ requires:
 helpers: |
   # Ensure Playwright browsers are installed (runs once, fast if already done)
   ensure_playwright() {
-    cd "$PLUGIN_DIR/scripts" && npx --yes playwright install chromium >&2
+    cd "$APP_DIR/scripts" && npx --yes playwright install chromium >&2
   }
   
   # Run browser action
   browser() {
     ensure_playwright
-    node "$PLUGIN_DIR/scripts/browser.mjs"
+    node "$APP_DIR/scripts/browser.mjs"
   }
 
 actions:

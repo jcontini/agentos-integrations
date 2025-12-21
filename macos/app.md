@@ -5,6 +5,10 @@ description: Open apps, URLs, files, and navigate your Mac file system
 icon: https://cdn.simpleicons.org/apple
 color: "#000000"
 
+website: https://www.apple.com/macos/
+privacy_url: https://www.apple.com/legal/privacy/
+terms_url: https://www.apple.com/legal/internet-services/terms/site.html
+
 tags: [open apps, open files, open URLs, file navigation, macOS]
 platform: macos
 requires:

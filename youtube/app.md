@@ -97,7 +97,7 @@ Extract transcripts, download videos, and get metadata from YouTube using yt-dlp
 
 ## Requirements
 
-This plugin requires `yt-dlp` to be installed on your system:
+This app requires `yt-dlp` to be installed on your system:
 
 ```bash
 # macOS (Homebrew)
@@ -121,7 +121,7 @@ Get the transcript/subtitles from a YouTube video as plain text.
 
 **Example:**
 ```
-use-plugin(plugin: "youtube", tool: "transcribe", params: {url: "https://youtube.com/watch?v=..."})
+use-app(app: "youtube", tool: "transcribe", params: {url: "https://youtube.com/watch?v=..."})
 ```
 
 **Notes:**
@@ -137,7 +137,7 @@ Get video metadata as JSON (title, duration, channel, view count, etc).
 
 **Example:**
 ```
-use-plugin(plugin: "youtube", tool: "metadata", params: {url: "https://youtube.com/watch?v=..."})
+use-app(app: "youtube", tool: "metadata", params: {url: "https://youtube.com/watch?v=..."})
 ```
 
 ### download
@@ -149,7 +149,7 @@ Download the video file to the user's Downloads folder.
 
 **Example:**
 ```
-use-plugin(plugin: "youtube", tool: "download", params: {url: "https://youtube.com/watch?v=...", quality: "720"})
+use-app(app: "youtube", tool: "download", params: {url: "https://youtube.com/watch?v=...", quality: "720"})
 ```
 
 ### audio
@@ -160,7 +160,7 @@ Extract audio as MP3 to the user's Downloads folder.
 
 **Example:**
 ```
-use-plugin(plugin: "youtube", tool: "audio", params: {url: "https://youtube.com/watch?v=..."})
+use-app(app: "youtube", tool: "audio", params: {url: "https://youtube.com/watch?v=..."})
 ```
 
 ## URL Formats
