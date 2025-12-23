@@ -65,4 +65,3 @@ Some Linear-specific operations are available through extended actions:
 - `get_cycles` - List cycles for a team
 - `add_blocking` - Set blocking relationships
 - `add_related` - Link related issues
-

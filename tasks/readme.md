@@ -28,9 +28,9 @@ schema:
       description: Current task status
     priority:
       type: number
-      min: 0
-      max: 3
-      description: "Priority: 0=Urgent (P0), 1=High (P1), 2=Medium (P2), 3=Low (P3)"
+      min: 1
+      max: 4
+      description: "Priority: 1=Urgent (P1), 2=High (P2), 3=Medium (P3), 4=Low (P4)"
     due:
       type: datetime
       description: Due date/time

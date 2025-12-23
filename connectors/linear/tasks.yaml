@@ -85,7 +85,7 @@ actions:
             [].state.type == 'completed' ? 'done' :
             [].state.type == 'canceled' ? 'cancelled' :
             [].state.type == 'started' ? 'in_progress' : 'open'
-          priority: "[].priority - 1"  # Linear 1=urgent → our 0
+          priority: "[].priority"  # Direct: Linear 1=urgent → our 1
           due: "[].dueDate"
           assignee:
             id: "[].assignee.id"
@@ -143,7 +143,7 @@ actions:
             .state.type == 'completed' ? 'done' :
             .state.type == 'canceled' ? 'cancelled' :
             .state.type == 'started' ? 'in_progress' : 'open'
-          priority: ".priority - 1"  # Linear 1=urgent → our 0
+          priority: ".priority"  # Direct: Linear 1=urgent → our 1
           due: ".dueDate"
           assignee:
             id: ".assignee.id"
@@ -190,7 +190,7 @@ actions:
           teamId: "{{params.team_id}}"
           title: "{{params.title}}"
           description: "{{params.description}}"
-          priority: "{{params.priority}} + 1"  # Our 0=urgent → Linear 1
+          priority: "{{params.priority}}"  # Direct: Our 1=urgent → Linear 1
           projectId: "{{params.project_id}}"
           parentId: "{{params.parent_id}}"
           dueDate: "{{params.due}}"
@@ -221,7 +221,7 @@ actions:
         input:
           title: "{{params.title}}"
           description: "{{params.description}}"
-          priority: "{{params.priority}} + 1"  # Our 0=urgent → Linear 1
+          priority: "{{params.priority}}"  # Direct: Our 1=urgent → Linear 1
           stateId: "{{params.state_id}}"
           dueDate: "{{params.due}}"
       response:

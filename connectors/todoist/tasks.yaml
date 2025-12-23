@@ -15,7 +15,7 @@ actions:
           title: "[].content"
           description: "[].description"
           status: "[].is_completed ? 'done' : 'open'"
-          priority: "4 - [].priority"  # Todoist 4=urgent → our 0
+          priority: "5 - [].priority"  # Todoist 4=urgent → our 1
           due: "[].due.date"
           project:
             id: "[].project_id"
@@ -34,7 +34,7 @@ actions:
           title: ".content"
           description: ".description"
           status: ".is_completed ? 'done' : 'open'"
-          priority: "4 - .priority"  # Todoist 4=urgent → our 0
+          priority: "5 - .priority"  # Todoist 4=urgent → our 1
           due: ".due.date"
           project:
             id: ".project_id"
@@ -51,7 +51,7 @@ actions:
         content: "{{params.title}}"
         description: "{{params.description}}"
         due_string: "{{params.due}}"
-        priority: "4 - {{params.priority}}"  # Our 0=urgent → Todoist 4
+        priority: "{{params.priority | invert:5}}"  # Our 1=urgent → Todoist 4
         project_id: "{{params.project_id}}"
         parent_id: "{{params.parent_id}}"
       response:
@@ -60,7 +60,7 @@ actions:
           title: ".content"
           description: ".description"
           status: "'open'"
-          priority: "4 - .priority"  # Todoist 4=urgent → our 0
+          priority: "5 - .priority"  # Todoist 4=urgent → our 1
           due: ".due.date"
           project:
             id: ".project_id"
@@ -75,14 +75,14 @@ actions:
         content: "{{params.title}}"
         description: "{{params.description}}"
         due_string: "{{params.due}}"
-        priority: "4 - {{params.priority}}"  # Our 0=urgent → Todoist 4
+        priority: "{{params.priority | invert:5}}"  # Our 1=urgent → Todoist 4
       response:
         mapping:
           id: ".id"
           title: ".content"
           description: ".description"
           status: ".is_completed ? 'done' : 'open'"
-          priority: "4 - .priority"  # Todoist 4=urgent → our 0
+          priority: "5 - .priority"  # Todoist 4=urgent → our 1
           due: ".due.date"
           url: ".url"
           connector: "'todoist'"
