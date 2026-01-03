@@ -375,6 +375,41 @@ This ensures:
 
 ---
 
+## Icon Requirements
+
+Every app must have an `icon.svg` file. Icons are validated by structure tests.
+
+### Requirements
+
+| Requirement | Why |
+|-------------|-----|
+| Use `viewBox` attribute | Scales properly at any size |
+| Use `currentColor` for fills/strokes | Adapts to light/dark themes |
+| Under 5KB | Fast loading |
+| No hardcoded colors | Theme compatibility |
+
+### Example Icon
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" 
+     fill="none" stroke="currentColor" stroke-width="2">
+  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+</svg>
+```
+
+### Where to Find Icons
+
+Good sources for SVG icons (copy the SVG, don't use Iconify runtime):
+- [Lucide](https://lucide.dev/) — Clean, consistent line icons
+- [Heroicons](https://heroicons.com/) — Tailwind's icon set
+- [Tabler Icons](https://tabler.io/icons) — 4000+ free icons
+- [Material Symbols](https://fonts.google.com/icons) — Google's icons
+
+Copy the SVG source directly into your `icon.svg` file.
+
+---
+
 ## Credentials
 
 Connectors never see credential values. Auth config in `readme.md` specifies WHERE credentials go:
@@ -717,6 +752,25 @@ jobs:
       - run: npm test
 ```
 
+### Structure Validation Tests
+
+The `tests/structure.test.ts` file automatically validates all apps and connectors:
+
+```bash
+npm test -- tests/structure.test.ts
+```
+
+**What it checks:**
+
+| For Apps | For Connectors | For Icons |
+|----------|----------------|-----------|
+| Has `readme.md` | Has `readme.md` | Uses `viewBox` |
+| Has `icon.svg` | Has yaml or icon | Uses `currentColor` |
+| Valid SVG icon | Yaml references valid app | Under 5KB |
+| Data apps have `schema.sql` | | No hardcoded colors |
+
+These tests run automatically with `npm test` - you don't need to write them.
+
 ### Adding Tests to Your Contribution
 
 When contributing an app or connector:
@@ -725,4 +779,5 @@ When contributing an app or connector:
 2. Add at least one test file (`*.test.ts`)
 3. Include fixture files if needed
 4. Run `npm test -- {your-path}` to verify
-5. Tests must pass before merge
+5. Structure tests validate your files automatically
+6. All tests must pass before merge
