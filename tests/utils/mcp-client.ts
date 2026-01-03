@@ -279,11 +279,11 @@ export class AgentOS {
   books = {
     list: (params?: object) => this.call('Books', { action: 'list', params }),
     get: (id: string) => this.call('Books', { action: 'get', params: { id } }),
-    create: (params: object) => this.call('Books', { action: 'create', params }),
-    update: (id: string, params: object) => this.call('Books', { action: 'update', params: { id, ...params } }),
-    delete: (id: string) => this.call('Books', { action: 'delete', params: { id } }),
+    create: (params: object) => this.call('Books', { action: 'create', params, execute: true }),
+    update: (id: string, params: object) => this.call('Books', { action: 'update', params: { id, ...params }, execute: true }),
+    delete: (id: string) => this.call('Books', { action: 'delete', params: { id }, execute: true }),
     import: (connector: string, path: string, dry_run = false) => 
-      this.call('Books', { action: 'import', connector, params: { path, dry_run } }),
+      this.call('Books', { action: 'import', connector, params: { path, dry_run }, execute: true }),
   };
 
   tasks = {

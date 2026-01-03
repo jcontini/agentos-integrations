@@ -43,12 +43,13 @@ export async function cleanupTestData(
   
   try {
     const items = await agentOS.call(app, { action: 'list', params: { limit: 1000 } });
-    const testItems = items.filter(filterFn);
+    const testItems = (items || []).filter(filterFn);
     
     let deleted = 0;
     for (const item of testItems) {
       try {
-        await agentOS.call(app, { action: 'delete', params: { id: item.id } });
+        // Note: execute: true required for write actions
+        await agentOS.call(app, { action: 'delete', params: { id: item.id }, execute: true });
         deleted++;
       } catch (e) {
         console.warn(`Failed to delete ${app} item ${item.id}:`, e);

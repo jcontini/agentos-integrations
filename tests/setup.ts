@@ -2,14 +2,15 @@
  * Global Test Setup
  * 
  * Starts the MCP connection before tests run and tears it down after.
- * This is run once for all tests via vitest's globalSetup.
+ * This runs via vitest's setupFiles in the same process as tests.
  */
 
+import { beforeAll, afterAll } from 'vitest';
 import { AgentOS, setGlobalAgentOS } from './utils/mcp-client';
 
 let aos: AgentOS | null = null;
 
-export async function setup() {
+beforeAll(async () => {
   console.log('\n🔌 Connecting to AgentOS...');
   
   try {
@@ -26,13 +27,13 @@ export async function setup() {
     console.error('  cd ~/dev/agentos && npm run tauri build -- --debug\n');
     throw error;
   }
-}
+});
 
-export async function teardown() {
+afterAll(async () => {
   if (aos) {
     console.log('\n🔌 Disconnecting from AgentOS...');
     await aos.disconnect();
     setGlobalAgentOS(null);
     console.log('✅ AgentOS disconnected\n');
   }
-}
+});

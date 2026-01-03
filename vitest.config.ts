@@ -8,8 +8,8 @@ export default defineConfig({
       'connectors/**/tests/**/*.test.ts',
     ],
     
-    // Global setup (starts MCP connection)
-    globalSetup: './tests/setup.ts',
+    // Setup file runs in same process as tests (unlike globalSetup)
+    setupFiles: ['./tests/setup.ts'],
     
     // Test environment
     environment: 'node',
@@ -18,8 +18,11 @@ export default defineConfig({
     testTimeout: 30000,
     
     // Run tests sequentially (MCP connection is shared)
-    sequence: {
-      concurrent: false,
+    pool: 'forks',
+    poolOptions: {
+      forks: {
+        singleFork: true,  // All tests in one process to share MCP connection
+      },
     },
     
     // Reporter
