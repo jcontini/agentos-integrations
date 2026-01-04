@@ -145,28 +145,39 @@ Track your reading library across services.
 ```yaml
 actions:
   import:
-    csv:
-      path: "{{params.path}}"
-      response:
-        mapping:
-          goodreads_id: "[].Book Id"
-          title: "[].Title"
-          authors: "[].Author | to_array"
-          isbn: "[].ISBN | strip_quotes"
-          isbn13: "[].ISBN13 | strip_quotes"
-          rating: "[].My Rating | to_int"
-          status: |
-            [].Exclusive Shelf == 'read' ? 'read' :
-            [].Exclusive Shelf == 'currently-reading' ? 'reading' : 'want_to_read'
-          date_added: "[].Date Added"
-          date_finished: "[].Date Read"
-          review: "[].My Review"
-          source_connector: "'goodreads'"
-          source_id: "[].Book Id"
-    app:
-      action: upsert
-      table: books
-      on_conflict: [source_connector, source_id]
+    # Chained executor: csv reads file, app upserts to database
+    - csv:
+        path: "{{params.path}}"
+        response:
+          mapping:
+            # Source tracking
+            source_connector: "'goodreads'"
+            source_id: "[].'Book Id'"
+            
+            # Core metadata
+            title: "[].'Title'"
+            authors: "[].'Author' | to_array"
+            isbn: "[].'ISBN' | strip_quotes"
+            isbn13: "[].'ISBN13' | strip_quotes"
+            
+            # Personal data
+            status: |
+              [].'Exclusive Shelf' == 'to-read' ? 'want_to_read' :
+              [].'Exclusive Shelf' == 'currently-reading' ? 'reading' :
+              [].'Exclusive Shelf' == 'read' ? 'read' : 'none'
+            rating: "[].'My Rating' | to_int"
+            review: "[].'My Review'"
+            
+            # Dates (convert / to - for ISO format)
+            date_added: "[].'Date Added' | replace:/:-"
+            date_finished: "[].'Date Read' | replace:/:-"
+      as: records
+    
+    - app:
+        action: upsert
+        table: books
+        on_conflict: [source_connector, source_id]
+        data: "{{records}}"
 ```
 
 **`connectors/hardcover/books.yaml`** — Sync with API
@@ -292,12 +303,56 @@ command:
 ```
 
 ### Chained Executors
+
+Chain multiple executors to build complex workflows. Each step can name its output with `as:`, and subsequent steps can reference it with `{{name.field}}`.
+
 ```yaml
-action:
-  - graphql: { query: "..." }
-    as: step1
-  - rest:
-      url: "https://api.example.com/{{step1.data.id}}"
+actions:
+  complete:
+    # Step 1: Look up the "completed" state for this issue's team
+    - graphql:
+        query: |
+          query($id: String!) {
+            issue(id: $id) {
+              team { states(filter: { type: { eq: "completed" } }) { nodes { id } } }
+            }
+          }
+        variables:
+          id: "{{params.id}}"
+      as: lookup
+    
+    # Step 2: Use the lookup result to update the issue
+    - graphql:
+        query: |
+          mutation($id: String!, $input: IssueUpdateInput!) {
+            issueUpdate(id: $id, input: $input) { success }
+          }
+        variables:
+          id: "{{params.id}}"
+          input:
+            stateId: "{{lookup.data.issue.team.states.nodes[0].id}}"
+```
+
+**Data flow pattern for imports:**
+```yaml
+actions:
+  import:
+    # Step 1: Read and transform CSV
+    - csv:
+        path: "{{params.path}}"
+        response:
+          mapping:
+            title: "[].'Title'"
+            authors: "[].'Author' | to_array"
+            isbn: "[].'ISBN' | strip_quotes"
+      as: records
+    
+    # Step 2: Upsert to database (references step 1's output)
+    - app:
+        action: upsert
+        table: books
+        on_conflict: [source_connector, source_id]
+        data: "{{records}}"
 ```
 
 ---
