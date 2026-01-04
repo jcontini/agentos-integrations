@@ -3,15 +3,37 @@
 
 actions:
   import:
-    description: Import books from Goodreads CSV export
-    executor: rust
-    function: goodreads_import
-    params:
-      path:
-        type: string
-        required: true
-        description: Path to goodreads_library_export.csv
-      dry_run:
-        type: boolean
-        default: false
-        description: Preview without importing
+    # Chained executor: csv reads file, app upserts to database
+    - csv:
+        path: "{{params.path}}"
+        response:
+          mapping:
+            # Source tracking
+            source_connector: "'goodreads'"
+            source_id: "[].'Book Id'"
+            
+            # Core metadata
+            title: "[].'Title'"
+            authors: "[].'Author' | to_array"
+            isbn: "[].'ISBN' | strip_quotes"
+            isbn13: "[].'ISBN13' | strip_quotes"
+            
+            # Personal data
+            status: |
+              [].'Exclusive Shelf' == 'to-read' ? 'want_to_read' :
+              [].'Exclusive Shelf' == 'currently-reading' ? 'reading' :
+              [].'Exclusive Shelf' == 'read' ? 'read' : 'none'
+            rating: "[].'My Rating' | to_int"
+            review: "[].'My Review'"
+            
+            # Dates
+            date_added: "[].'Date Added' | replace:/:-"
+            date_started: "[].'Date Read' | replace:/:-"
+            date_finished: "[].'Date Read' | replace:/:-"
+      as: records
+    
+    - app:
+        action: upsert
+        table: books
+        on_conflict: [source_connector, source_id]
+        data: "{{records}}"
