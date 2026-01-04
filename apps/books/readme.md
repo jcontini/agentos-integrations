@@ -65,7 +65,7 @@ schema:
       type: array
       items: { type: string }
       description: User organization tags (shelves, categories)
-    external_ids:
+    refs:
       type: object
       description: IDs in external systems (goodreads, hardcover, isbn, etc.)
     metadata:

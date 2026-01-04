@@ -25,8 +25,8 @@ actions:
             date_added: "[].'Date Added' | replace:/:-"
             date_finished: "[].'Date Read' | replace:/:-"
             
-            # External IDs (for linking/dedup)
-            external_ids:
+            # Refs (for linking/dedup across services)
+            refs:
               goodreads: "[].'Book Id'"
               isbn: "[].'ISBN' | strip_quotes"
               isbn13: "[].'ISBN13' | strip_quotes"
@@ -43,5 +43,5 @@ actions:
     - app:
         action: upsert
         table: books
-        on_conflict: external_ids.goodreads
+        on_conflict: refs.goodreads
         data: "{{records}}"
