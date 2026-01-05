@@ -267,14 +267,13 @@ instructions: |
   
   **Getting started:**
   1. Pull your Goodreads library: `Books(action: "pull", connector: "goodreads", path: "~/Downloads/goodreads_library_export.csv")`
-  2. View your library: `Books(action: "list")`
+  2. View your library: `Books(action: "list")` (defaults to local library)
   3. Update a book: `Books(action: "update", id: "...", rating: 5, status: "read")`
   
   **Connectors:**
-  - `goodreads` - Pull only (CSV, no API)
+  - `local` - Your local library (default for list/get/create/update/delete)
+  - `goodreads` - Pull only (CSV import, no API)
   - `hardcover` - Pull and push (API)
-  - `google_books` - Search/metadata only
-  - `openlibrary` - Search/metadata only
 ---
 
 # Books
@@ -295,7 +294,7 @@ Books(action: "pull", connector: "goodreads", path: "~/Downloads/goodreads_libra
 ### Browse Your Library
 
 ```
-Books(action: "list")                           # All books
+Books(action: "list")                           # All books (uses local library by default)
 Books(action: "list", status: "read")           # Books you've read
 Books(action: "list", status: "reading")        # Currently reading
 Books(action: "list", rating: 4)                # 4+ star books
@@ -341,12 +340,11 @@ Books(action: "push", connector: "hardcover")                   # Push
 
 ## Connectors
 
-| Connector | Pull | Push | Notes |
-|-----------|------|------|-------|
-| `goodreads` | ✅ CSV | ❌ | No API since ~2020 |
-| `hardcover` | ✅ | ✅ | Full API support |
-| `google_books` | ❌ | ❌ | Metadata search only |
-| `openlibrary` | ❌ | ❌ | Metadata search only |
+| Connector | List/Get | Create/Update | Pull | Push | Notes |
+|-----------|----------|---------------|------|------|-------|
+| `local` | ✅ | ✅ | - | - | Default. Your local SQLite library |
+| `goodreads` | ❌ | ❌ | ✅ CSV | ❌ | Import from CSV export |
+| `hardcover` | ❌ | ❌ | ✅ | ✅ | Full API support |
 
 ## Data Storage
 
