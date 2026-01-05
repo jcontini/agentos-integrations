@@ -557,6 +557,63 @@ auth:
 
 AgentOS injects the actual value at runtime.
 
+### Auth Configuration Options
+
+| Field | Description | Example |
+|-------|-------------|---------|
+| `type` | Auth type: `api_key`, `connection_string`, `oauth` | `api_key` |
+| `header` | HTTP header name for the credential | `Authorization` |
+| `prefix` | Prefix added before the credential value | `"Bearer "` |
+| `label` | Human-readable name shown in UI | `"Authorization Header"` |
+| `placeholder` | Example value shown in the input field | `"Bearer eyJhbG..."` |
+| `help_url` | Link to docs on how to get the credential | `https://example.com/api` |
+
+### Bearer Token Example
+
+For APIs that use Bearer tokens (like Hardcover, Linear):
+
+```yaml
+# connectors/hardcover/readme.md
+auth:
+  type: api_key
+  header: Authorization
+  prefix: "Bearer "
+  label: Authorization Header
+  placeholder: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOi..."
+  help_url: https://hardcover.app/account/api
+```
+
+**How it works:**
+- User sees label "Authorization Header" in the UI
+- Placeholder shows an example of what to paste
+- User can paste with or without "Bearer " prefix (AgentOS strips it automatically)
+- AgentOS adds the `Bearer ` prefix when making API calls
+
+### Simple API Key Example
+
+For APIs that just need a key in a header:
+
+```yaml
+# connectors/todoist/readme.md
+auth:
+  type: api_key
+  header: Authorization
+  prefix: "Bearer "
+  label: API Token
+  help_url: https://todoist.com/app/settings/integrations/developer
+```
+
+### Local Connectors (No Auth)
+
+Connectors that don't need credentials (like file importers):
+
+```yaml
+# connectors/goodreads/readme.md
+auth: null
+```
+
+These appear as "local" connectors with an implicit default account.
+
 ---
 
 ## Example: Building a Movies App

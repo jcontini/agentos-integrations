@@ -2,14 +2,18 @@
 id: hardcover
 name: Hardcover
 description: Modern alternative to Goodreads for tracking your reading
-icon: icon.svg
+icon: icon.png
 website: https://hardcover.app
+
+apps:
+  - books
 
 auth:
   type: api_key
-  header: authorization
-  prefix: ""
-  label: API Token
+  header: Authorization
+  prefix: "Bearer "
+  label: Authorization Header
+  placeholder: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOi..."
   help_url: https://hardcover.app/account/api
 ---
 
