@@ -1,222 +1,195 @@
 # Contributing to AgentOS Integrations
 
-## Mental Model
+## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │  INTERFACES: MCP Server • HTTP API • CarPlay • Widgets • ...       │
-│  (All call into the same AgentOS Core)                              │
 └─────────────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │  APPS: Tasks • Books • Messages • Calendar • Finance • Databases   │
-│  Location: apps/{app}/                                              │
-│    - readme.md: schema (YAML), actions, params, returns             │
-│    - icon.svg: app icon                                             │
+│  Location: apps/{app}/readme.md                                     │
+│    - Schema (YAML) auto-generates database tables                   │
+│    - Actions define what the app can do                             │
 └─────────────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │  CONNECTORS: todoist • linear • goodreads • hardcover • postgres   │
-│  Location: connectors/{connector}/                                  │
-│    - readme.md: auth config                                         │
-│    - {app}.yaml: action→executor mappings with transforms          │
+│  Location: apps/{app}/connectors/{connector}/mapping.yaml          │
+│    - Maps unified actions to service-specific APIs                  │
+│    - Transforms responses to app schema                             │
 └─────────────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │  EXECUTORS: rest: • graphql: • sql: • csv: • command: • app:       │
-│  Location: AgentOS Core (Rust)                                      │
+│  Location: AgentOS Core (Rust) — you don't modify these            │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-| Layer | What | Location |
-|-------|------|----------|
-| **App** | Capability with unified schema | `apps/{app}/` |
-| **Connector** | Service implementation + transforms | `connectors/{connector}/` |
-| **Executor** | Protocol handler (Rust) | AgentOS Core |
-
----
-
-## Connector-Based Architecture
-
-**Every action requires a `connector` parameter.** This includes the built-in `local` connector.
-
+**Every action requires a `connector` parameter:**
 ```
 Books(action: "list", connector: "local")     → Local SQLite
 Books(action: "pull", connector: "goodreads") → Goodreads CSV
-Books(action: "push", connector: "hardcover") → Hardcover API
 Tasks(action: "list", connector: "linear")    → Linear API
-Tasks(action: "list", connector: "todoist")   → Todoist API
 ```
-
-### The `local` Connector
-
-`local` is a built-in connector available for apps with a `schema:` in their readme.md:
-- Uses per-app SQLite database at `~/.agentos/data/{app}.db`
-- Auto-generated from YAML schema
-- Supports CRUD actions (list, get, create, update, delete)
-
-### External Connectors
-
-External connectors (goodreads, hardcover, linear, todoist) implement pull/push actions to move data between local storage and external services.
 
 ---
 
-## App Structure
+## File Structure
 
-### Pass-through App
 ```
-apps/tasks/
-  readme.md     # Schema + actions
-  icon.svg
+apps/
+  books/
+    readme.md           ← Schema + actions (auto-generates DB)
+    icon.svg            ← App icon (required)
+    connectors/
+      goodreads/
+        readme.md       ← Auth config
+        mapping.yaml    ← Action implementations
+        icon.png
+      hardcover/
+        readme.md
+        mapping.yaml
+        icon.png
+    tests/
+      books.test.ts     ← App tests
 ```
-
-### Data App
-```
-apps/books/
-  readme.md     # Schema + actions (schema: section triggers DB creation)
-  icon.svg
-```
-
-When `schema:` exists in readme.md, AgentOS automatically:
-1. Creates `~/.agentos/data/{app}.db`
-2. Generates tables from YAML schema
-3. Exposes CRUD actions (list, get, create, update, delete)
 
 ---
 
-## Adding a Data App
+## Creating an App
 
-### 1. Create the App
+**Reference:** See `apps/books/readme.md` for a complete example.
 
-**`apps/books/readme.md`** — Schema in YAML auto-generates database tables
+### App readme.md structure
+
 ```yaml
+---
+id: books
+name: Books
+description: Track your reading library
+icon: icon.svg
+color: "#8B4513"
+
 schema:
   book:
     id: { type: string, required: true }
     title: { type: string, required: true }
-    authors: { type: array }
-    isbn: { type: string }
-    status: { type: enum, values: [want_to_read, reading, read, dnf] }
-    rating: { type: number, min: 1, max: 5 }
-    review: { type: string }
-    date_added: { type: datetime }
-    date_finished: { type: datetime }
-    tags: { type: array }
-    refs: { type: object }        # IDs in external systems
-    metadata: { type: object }    # Connector-specific extras
+    # ... fields define database columns
 
 actions:
   list:
-    description: List books with filters
-  get:
-    description: Get a single book
-  create:
-    description: Add a book
-  update:
-    description: Update a book
-  delete:
-    description: Remove a book
-  pull:
-    description: Pull from a connector (Goodreads CSV, Hardcover API)
-  push:
-    description: Push to a connector (Hardcover API)
+    description: List books from library
+    readonly: true
+    params:
+      status: { type: string }
+      limit: { type: number, default: 50 }
+    returns: book[]
+  # ... actions define what the app can do
+
+instructions: |
+  Context for AI when using this app.
+---
+
+# Human-readable documentation below the YAML frontmatter
 ```
 
-### 2. Create Connectors
+### Schema field types
 
-**`connectors/goodreads/books.yaml`** — Pull from CSV
+| Type | Example | Notes |
+|------|---------|-------|
+| `string` | `title: { type: string }` | |
+| `number` | `rating: { type: number, min: 1, max: 5 }` | |
+| `boolean` | `completed: { type: boolean }` | |
+| `datetime` | `created_at: { type: datetime }` | ISO 8601 |
+| `enum` | `status: { type: enum, values: [a, b, c] }` | |
+| `array` | `tags: { type: array, items: { type: string } }` | |
+| `object` | `refs: { type: object }` | JSON blob |
+
+### Standard fields
+
+Every schema should include:
+
 ```yaml
-actions:
-  pull:
-    # Chained executor: csv reads file, app upserts to database
-    - csv:
-        path: "{{params.path}}"
-        response:
-          mapping:
-            # Core metadata
-            title: "[].'Title'"
-            authors: "[].'Author' | to_array"
-            
-            # Personal data
-            status: |
-              [].'Exclusive Shelf' == 'to-read' ? 'want_to_read' :
-              [].'Exclusive Shelf' == 'currently-reading' ? 'reading' :
-              [].'Exclusive Shelf' == 'read' ? 'read' : 'none'
-            rating: "[].'My Rating' | to_int"
-            review: "[].'My Review'"
-            tags: "[].'Bookshelves' | split:,"
-            
-            # Dates (convert / to - for ISO format)
-            date_added: "[].'Date Added' | replace:/:-"
-            date_finished: "[].'Date Read' | replace:/:-"
-            
-            # Refs (IDs in external systems)
-            refs:
-              goodreads: "[].'Book Id'"
-              isbn: "[].'ISBN' | strip_quotes"
-              isbn13: "[].'ISBN13' | strip_quotes"
-      as: records
-    
-    - app:
-        action: upsert
-        table: books
-        on_conflict: refs.goodreads
-        data: "{{records}}"
+id: { type: string, required: true }       # AgentOS internal ID
+refs: { type: object }                     # IDs in external systems
+metadata: { type: object }                 # Connector-specific extras
+created_at: { type: datetime }
+updated_at: { type: datetime }
 ```
 
-**`connectors/hardcover/books.yaml`** — Push to API
-```yaml
-actions:
-  push:
-    # Step 1: Get books from local DB that haven't been pushed
-    - app:
-        action: list
-        table: books
-        where:
-          refs.hardcover: null
-      as: local_books
-    
-    # Step 2: For each book, search Hardcover and push
-    - foreach: "{{local_books}}"
-      graphql:
-        query: |
-          mutation($book_id: Int!, $status_id: Int!) {
-            insert_user_book(object: {book_id: $book_id, status_id: $status_id}) {
-              id
-            }
-          }
-        variables:
-          book_id: "{{item.refs.hardcover}}"
-          status_id: |
-            {{item.status}} == 'read' ? 3 :
-            {{item.status}} == 'reading' ? 2 : 1
-```
+**refs** = External IDs for dedup: `{ goodreads: "123", isbn: "978..." }`  
+**metadata** = Connector-specific data: `{ average_rating: 4.2, num_pages: 350 }`
 
 ---
 
-## Connector Structure
+## Creating a Connector
+
+**Reference:** See `apps/books/connectors/goodreads/mapping.yaml` for CSV import, `apps/tasks/connectors/linear/mapping.yaml` for GraphQL API.
+
+### Connector structure
 
 ```
-connectors/goodreads/
-  readme.md       # Auth config (if any)
-  icon.svg
-  books.yaml      # Implements Books app
+apps/books/connectors/goodreads/
+  readme.md       ← Auth config
+  mapping.yaml    ← Action implementations
+  icon.png        ← Service icon
 ```
 
-**One YAML per app.** If `connectors/hardcover/books.yaml` exists, Hardcover implements Books.
+### Auth configuration (readme.md)
+
+```yaml
+# API key auth
+auth:
+  type: api_key
+  header: Authorization
+  prefix: "Bearer "
+  label: API Token
+  help_url: https://service.com/api-docs
+
+# No auth needed (file imports)
+auth: null
+```
+
+### Action mapping (mapping.yaml)
+
+```yaml
+actions:
+  list:
+    graphql:
+      query: "{ items { id name } }"
+      response:
+        root: "data.items"
+        mapping:
+          id: "[].id"
+          title: "[].name"
+```
 
 ---
 
 ## Executors
 
-### `rest:` — REST APIs
+| Executor | Use case | Example |
+|----------|----------|---------|
+| `rest:` | REST APIs | `apps/finance/connectors/copilot/mapping.yaml` |
+| `graphql:` | GraphQL APIs | `apps/tasks/connectors/linear/mapping.yaml` |
+| `csv:` | CSV file import | `apps/books/connectors/goodreads/mapping.yaml` |
+| `sql:` | Database queries | `apps/databases/connectors/postgres/mapping.yaml` |
+| `app:` | Local DB operations | Used in pull workflows |
+| `command:` | CLI tools | `apps/files/connectors/macos/mapping.yaml` |
+
+### REST executor
+
 ```yaml
 rest:
   method: GET
-  url: https://api.example.com/{{params.id}}
+  url: "https://api.example.com/items/{{params.id}}"
+  headers:
+    X-Custom: "value"
   body: { field: "{{params.value}}" }
   response:
     mapping:
@@ -224,78 +197,42 @@ rest:
       title: ".name"
 ```
 
-### `graphql:` — GraphQL APIs
+### GraphQL executor
+
 ```yaml
 graphql:
-  endpoint: "https://api.hardcover.app/v1/graphql"
-  query: "query { items { id name } }"
-  variables: { limit: "{{params.limit}}" }
+  query: |
+    query($id: ID!) {
+      item(id: $id) { id name status }
+    }
+  variables:
+    id: "{{params.id}}"
   response:
-    root: "data.items"
+    root: "data.item"
     mapping:
-      id: "[].id"
-      title: "[].name"
+      id: ".id"
+      title: ".name"
 ```
 
-**Note:** The `endpoint` can be specified per-action (in the YAML above) or once at the connector level in `readme.md`:
+### CSV executor
 
-```yaml
-# connectors/linear/readme.md
-api:
-  graphql_endpoint: "https://api.linear.app/graphql"
-```
-
-If neither is specified, the executor will error with instructions.
-
-### `sql:` — Database queries
-```yaml
-sql:
-  query: "SELECT * FROM table WHERE id = {{params.id}}"
-```
-
-### `csv:` — CSV file reading
 ```yaml
 csv:
   path: "{{params.path}}"
   response:
     mapping:
-      title: "[].Column Name"
-      value: "[].Other Column | transform"
+      title: "[].'Column Name'"
+      rating: "[].'Rating' | to_int"
 ```
 
-### `app:` — Per-app database operations
-```yaml
-# List with filters
-app:
-  action: list
-  table: books
-  where:
-    status: "{{params.status}}"
-  limit: "{{params.limit}}"
+### Chained executors
 
-# Upsert (insert or update)
-app:
-  action: upsert
-  table: books
-  on_conflict: refs.goodreads  # or refs.isbn, etc.
-```
-
-### `command:` — CLI tools (firewall-controlled)
-```yaml
-command:
-  binary: tree
-  args: ["-L", "2", "{{params.path}}"]
-  timeout: 30
-```
-
-### Chained Executors
-
-Chain multiple executors to build complex workflows. Each step can name its output with `as:`, and subsequent steps can reference it with `{{name.field}}`.
+Chain multiple steps with `as:` to name outputs:
 
 ```yaml
 actions:
   complete:
-    # Step 1: Look up the "completed" state for this issue's team
+    # Step 1: Look up the completed state
     - graphql:
         query: |
           query($id: String!) {
@@ -307,7 +244,7 @@ actions:
           id: "{{params.id}}"
       as: lookup
     
-    # Step 2: Use the lookup result to update the issue
+    # Step 2: Use the lookup result
     - graphql:
         query: |
           mutation($id: String!, $input: IssueUpdateInput!) {
@@ -319,659 +256,117 @@ actions:
             stateId: "{{lookup.data.issue.team.states.nodes[0].id}}"
 ```
 
-**Data flow pattern for pull:**
-```yaml
-actions:
-  pull:
-    # Step 1: Read and transform CSV
-    - csv:
-        path: "{{params.path}}"
-        response:
-          mapping:
-            title: "[].'Title'"
-            authors: "[].'Author' | to_array"
-            refs:
-              isbn: "[].'ISBN' | strip_quotes"
-              goodreads: "[].'Book Id'"
-      as: records
-    
-    # Step 2: Upsert to database (references step 1's output)
-    - app:
-        action: upsert
-        table: books
-        on_conflict: refs.goodreads
-        data: "{{records}}"
-```
+**See:** `apps/tasks/connectors/linear/mapping.yaml` for real chained executor examples.
 
 ---
 
 ## Response Mapping
 
-All executors support `response.mapping` to transform data to the app schema.
+Transform API responses to app schema:
 
-### Syntax
 ```yaml
-mapping:
-  # Direct field mapping
-  id: ".id"
-  title: ".name"
-  
-  # Array mapping (use [] prefix)
-  items: "[].id"
-  
-  # Transforms (pipe syntax)
-  authors: "[].author | to_array"
-  isbn: "[].isbn | strip_quotes"
-  
-  # Conditionals
-  status: ".completed ? 'done' : 'open'"
-  
-  # Complex conditionals
-  priority: |
-    .priority == 'urgent' ? 1 :
-    .priority == 'high' ? 2 :
-    .priority == 'medium' ? 3 : 4
-  
-  # Static values
-  connector: "'goodreads'"
+response:
+  root: "data.items"          # Where to find the data
+  mapping:
+    # Direct field
+    id: ".id"
+    
+    # Array iteration (use [] prefix)
+    title: "[].name"
+    
+    # Transforms
+    authors: "[].author | to_array"
+    isbn: "[].isbn | strip_quotes"
+    rating: "[].rating | to_int"
+    
+    # Conditionals
+    status: ".done ? 'completed' : 'open'"
+    
+    # Complex conditionals
+    status: |
+      .state == 'finished' ? 'done' :
+      .state == 'working' ? 'in_progress' : 'open'
+    
+    # Static values
+    connector: "'goodreads'"
+    
+    # Nested objects
+    refs:
+      goodreads: "[].id"
+      isbn: "[].isbn | strip_quotes"
 ```
 
-### Built-in Transforms
+### Built-in transforms
+
 | Transform | Description |
 |-----------|-------------|
 | `to_array` | Wrap single value in array |
 | `to_int` | Convert to integer |
-| `strip_quotes` | Remove `="..."` wrapper (common in CSV exports) |
+| `strip_quotes` | Remove `="..."` wrapper (CSV exports) |
 | `trim` | Remove whitespace |
-| `split:delimiter` | Split string into array (e.g., `split:,`) |
-| `nullif:value` | Return null if equals value (e.g., `nullif:0`) |
+| `split:,` | Split string to array |
+| `nullif:0` | Return null if equals value |
 | `default:value` | Use value if null/empty |
-| `replace:from:to` | Replace text (e.g., `replace:/:- ` for date conversion) |
-
-For arithmetic and conditionals, use mapping expressions directly:
-```yaml
-mapping:
-  priority: "4 - .priority"           # Invert priority
-  status: ".done ? 'done' : 'open'"   # Conditional
-```
+| `replace:from:to` | Text replacement |
 
 ---
 
-## Security: No Shell Scripts
+## Icons
 
-**`run:` blocks are not supported.** Connectors use declarative executor blocks only.
+Every app and connector needs an icon.
 
-| Executor | Use Case |
-|----------|----------|
-| `rest:` | REST APIs |
-| `graphql:` | GraphQL APIs |
-| `sql:` | Database queries |
-| `csv:` | CSV file reading |
-| `app:` | Local database operations |
-| `command:` | CLI tools (user-approved via firewall) |
+**Apps:** `icon.svg` — must use `viewBox` and `currentColor`  
+**Connectors:** `icon.png` or `icon.svg` — service branding
 
-This ensures:
-- Credentials never leave Rust core
-- All operations go through the firewall
-- No arbitrary code execution
-
----
-
-## Schema Conventions
-
-### Field Naming
-- **snake_case** — `created_at`, `parent_id`
-- **Flat structure** — avoid deep nesting in core fields
-
-### Universal Fields (every table should have)
-| Field | Type | Purpose |
-|-------|------|---------|
-| `id` | TEXT PRIMARY KEY | AgentOS internal UUID |
-| `refs` | JSON | IDs in external systems (goodreads, hardcover, isbn, etc.) |
-| `metadata` | JSON | Connector-specific extras |
-| `created_at` | TEXT | When created in AgentOS |
-| `updated_at` | TEXT | Last modified |
-
-### The Refs + Metadata Pattern
-
-Apps support **multiple connectors** with different fields. Use this pattern:
-
-```yaml
-schema:
-  item:
-    # Core fields: universal, queryable, powers the UI
-    id: { type: string, required: true }
-    title: { type: string, required: true }
-    status: { type: string }
-    rating: { type: number }
-    
-    # User organization
-    tags: { type: array }     # ["tag1", "tag2"] - simple array
-    
-    # External references (for linking/dedup)
-    refs: { type: object }    # { goodreads: "123", isbn: "978..." }
-    
-    # Connector-specific extras
-    metadata: { type: object } # Connector dumps its extras here
-```
-
-**Core fields** = Universal across all connectors, queryable, shown in UI  
-**tags** = User organization (shelves, categories, labels)  
-**refs** = IDs in external systems for dedup and linking  
-**metadata** = Connector-specific data preserved but not in core schema
-
-### Metadata Examples
-
-```json
-// Books from Goodreads
-{"bookshelves": ["sci-fi", "favorites"], "average_rating": 4.2}
-
-// Books from StoryGraph  
-{"pace": "slow", "moods": ["dark", "emotional"], "content_warnings": ["violence"]}
-
-// Books from Hardcover
-{"edition_id": "abc123", "progress": 150, "owned": true}
-
-// Tasks from Linear
-{"cycle": {"id": "...", "name": "Sprint 5"}, "estimate": 3}
-
-// Tasks from Todoist
-{"todoist_priority": 4, "parent_id": "..."}
-```
-
-### Why This Works
-
-1. **Schema stays clean** — Core fields cover 90% of use cases
-2. **No data loss** — Connector-specific fields preserved in metadata
-3. **No schema changes** — New connectors add fields to metadata, not schema
-4. **Queryable** — Core fields are indexed and fast
-5. **Portable** — When pushing between connectors, core fields transfer, metadata is connector-specific
-
-### Connectors Map to Core Fields
-
-Transforms happen in connector YAML, not the app schema:
-
-```yaml
-# connectors/goodreads/books.yaml
-response:
-  mapping:
-    title: "[].Title"
-    status: |
-      [].Exclusive Shelf == 'read' ? 'read' :
-      [].Exclusive Shelf == 'to-read' ? 'want_to_read' : 'none'
-    tags: "[].Bookshelves | split:, "
-    refs:
-      goodreads: "[].Book Id"
-      isbn: "[].ISBN | strip_quotes"
-    metadata:                                    # Extras go here
-      average_rating: "[].Average Rating"
-```
-
----
-
-## Icon Requirements
-
-Every app must have an `icon.svg` file. Icons are validated by structure tests.
-
-### Requirements
-
-| Requirement | Why |
-|-------------|-----|
-| Use `viewBox` attribute | Scales properly at any size |
-| Use `currentColor` for fills/strokes | Adapts to light/dark themes |
-| Under 5KB | Fast loading |
-| No hardcoded colors | Theme compatibility |
-
-### Example Icon
+### App icon requirements
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" 
      fill="none" stroke="currentColor" stroke-width="2">
-  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+  <path d="..."/>
 </svg>
 ```
 
-### Where to Find Icons
+- Use `viewBox` (scales properly)
+- Use `currentColor` (adapts to themes)
+- Under 5KB
 
-Good sources for SVG icons (copy the SVG, don't use Iconify runtime):
-- [Lucide](https://lucide.dev/) — Clean, consistent line icons
-- [Heroicons](https://heroicons.com/) — Tailwind's icon set
-- [Tabler Icons](https://tabler.io/icons) — 4000+ free icons
-- [Material Symbols](https://fonts.google.com/icons) — Google's icons
-
-Copy the SVG source directly into your `icon.svg` file.
+**Sources:** [Lucide](https://lucide.dev/), [Heroicons](https://heroicons.com/), [Tabler](https://tabler.io/icons)
 
 ---
 
-## Credentials
+## Security
 
-Connectors never see credential values. Auth config in `readme.md` specifies WHERE credentials go:
-
-```yaml
-auth:
-  type: api_key
-  header: Authorization
-  prefix: "Bearer "
-```
-
-AgentOS injects the actual value at runtime.
-
-### Auth Configuration Options
-
-| Field | Description | Example |
-|-------|-------------|---------|
-| `type` | Auth type: `api_key`, `connection_string`, `oauth` | `api_key` |
-| `header` | HTTP header name for the credential | `Authorization` |
-| `prefix` | Prefix added before the credential value | `"Bearer "` |
-| `label` | Human-readable name shown in UI | `"Authorization Header"` |
-| `placeholder` | Example value shown in the input field | `"Bearer eyJhbG..."` |
-| `help_url` | Link to docs on how to get the credential | `https://example.com/api` |
-
-### Bearer Token Example
-
-For APIs that use Bearer tokens (like Hardcover, Linear):
-
-```yaml
-# connectors/hardcover/readme.md
-auth:
-  type: api_key
-  header: Authorization
-  prefix: "Bearer "
-  label: Authorization Header
-  placeholder: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOi..."
-  help_url: https://hardcover.app/account/api
-```
-
-**How it works:**
-- User sees label "Authorization Header" in the UI
-- Placeholder shows an example of what to paste
-- User can paste with or without "Bearer " prefix (AgentOS strips it automatically)
-- AgentOS adds the `Bearer ` prefix when making API calls
-
-### Simple API Key Example
-
-For APIs that just need a key in a header:
-
-```yaml
-# connectors/todoist/readme.md
-auth:
-  type: api_key
-  header: Authorization
-  prefix: "Bearer "
-  label: API Token
-  help_url: https://todoist.com/app/settings/integrations/developer
-```
-
-### Local Connectors (No Auth)
-
-Connectors that don't need credentials (like file importers):
-
-```yaml
-# connectors/goodreads/readme.md
-auth: null
-```
-
-These appear as "local" connectors with an implicit default account.
-
----
-
-## Example: Building a Movies App
-
-### 1. Define the app schema
-
-**`apps/movies/readme.md`** — Schema auto-generates database
-```yaml
-schema:
-  movie:
-    id: { type: string, required: true }
-    title: { type: string, required: true }
-    year: { type: number }
-    directors: { type: array }
-    status: { type: enum, values: [watchlist, watching, watched] }
-    rating: { type: number }
-    review: { type: string }
-    tags: { type: array }
-    refs: { type: object }
-    metadata: { type: object }
-```
-
-### 2. Add Letterboxd connector
-
-**`connectors/letterboxd/movies.yaml`**
-```yaml
-actions:
-  pull:
-    # Chained: csv reads file, app writes to database
-    - csv:
-        path: "{{params.path}}"
-        response:
-          mapping:
-            title: "[].Name"
-            year: "[].Year | to_int"
-            rating: "[].Rating | to_int"
-            status: "'watched'"
-            refs:
-              letterboxd: "[].Letterboxd URI"
-      as: records
-    
-    - app:
-        action: upsert
-        table: movies
-        on_conflict: refs.letterboxd
-        data: "{{records}}"
-```
-
-### 3. Done!
-
-Users can now:
-```
-Pull my Letterboxd data from ~/Downloads/letterboxd.csv
-List all movies I've watched
-```
-
-No Rust code needed. The connector defines all the Letterboxd-specific logic.
+**No shell scripts.** Connectors use declarative YAML only — credentials never leave Rust core.
 
 ---
 
 ## Testing
 
-### Philosophy
+See [TESTING.md](./TESTING.md) for the full testing guide.
 
-**All tests are end-to-end.** We test the real AgentOS binary with real data. No mocking, no unit tests. If E2E passes, the whole stack works.
-
-**Tests live with the code they test.** Each app and connector includes its own tests. This scales to thousands of apps without bloating the core repo.
-
-### What Contributors Need
-
-| You need | You don't need |
-|----------|----------------|
-| Node.js + npm | Rust |
-| Vitest (test runner) | Playwright |
-| MCP client (provided) | Svelte |
-| AgentOS binary (built) | Core repo access |
-
-Contributors write **YAML configs + tests**. That's it. The MCP client talks to the real AgentOS binary - no browser automation needed.
-
-### Test Ownership
-
-| What | Where | Tests |
-|------|-------|-------|
-| AgentOS Core | `agentos/` repo | Executors, MCP protocol, UI (Playwright) |
-| Apps | `integrations/apps/{app}/` | Schema validation, CRUD operations |
-| Connectors | `integrations/connectors/{connector}/` | Pull/push, field mapping |
-
-### Directory Structure
-
-```
-integrations/
-  apps/
-    books/
-      readme.md                       ← Schema in YAML (auto-generates DB)
-      icon.svg
-      tests/                          ← App tests
-        books.test.ts
-        fixtures/
-          sample-books.json
-          
-  connectors/
-    goodreads/
-      books.yaml
-      readme.md
-      tests/                          ← Connector tests
-        pull.test.ts
-        fixtures/
-          goodreads-export.csv        ← Sample data for tests
-          
-    hardcover/
-      books.yaml
-      tests/
-        push.test.ts
-        
-  tests/                              ← Shared test infrastructure
-    utils/
-      mcp-client.ts                   ← MCP test client
-      fixtures.ts                     ← Common helpers
-    setup.ts                          ← Global test setup
-    tsconfig.json
-    
-  package.json                        ← Test dependencies (vitest, etc.)
-```
-
-### Running Tests
-
+**Quick start:**
 ```bash
-# Run all tests
-npm test
-
-# Run tests for a specific app
-npm test -- apps/books
-
-# Run tests for a specific connector
-npm test -- connectors/goodreads
-
-# Run with verbose output
-npm test -- --reporter=verbose
-
-# Watch mode during development
-npm test -- --watch
+npm install
+npm test                    # Run all tests
+npm test -- apps/books      # Run app tests
+npm test -- --watch         # Watch mode
 ```
 
-### What to Test
+Tests live with the code they test:
+- `apps/books/tests/books.test.ts`
+- `apps/books/connectors/goodreads/tests/pull.test.ts`
 
-#### App Tests (`apps/{app}/tests/`)
+---
 
-Test that the app's schema and CRUD work correctly:
+## Quick Reference
 
-```typescript
-// apps/books/tests/books.test.ts
-import { describe, it, expect, afterAll } from 'vitest';
-import { aos, cleanupTestData, TEST_PREFIX } from '../../../tests/utils/fixtures';
-
-describe('Books App', () => {
-  // MCP connection is handled globally by tests/setup.ts
-  // Just use the aos() helper to make calls
-  
-  afterAll(async () => {
-    // Clean up any test data we created
-    await cleanupTestData('Books');
-  });
-
-  describe('List', () => {
-    it('can list all books', async () => {
-      const books = await aos().books.list();
-      expect(Array.isArray(books)).toBe(true);
-    });
-
-    it('can filter by status', async () => {
-      const books = await aos().books.list({ status: 'read' });
-      books.forEach(book => {
-        expect(book.status).toBe('read');
-      });
-    });
-  });
-
-  describe('Data Integrity', () => {
-    it('books have required fields', async () => {
-      const books = await aos().books.list({ limit: 10 });
-      for (const book of books) {
-        expect(book.id).toBeDefined();
-        expect(book.title).toBeDefined();
-        expect(book.status).toBeDefined();
-        expect(['want_to_read', 'reading', 'read', 'dnf']).toContain(book.status);
-      }
-    });
-  });
-});
-```
-
-#### Connector Tests (`connectors/{connector}/tests/`)
-
-Test that the connector correctly pulls/pushes data:
-
-```typescript
-// connectors/goodreads/tests/pull.test.ts
-import { describe, it, expect, afterAll } from 'vitest';
-import { aos, cleanupTestData } from '../../../tests/utils/fixtures';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const fixturesDir = join(__dirname, 'fixtures');
-
-describe('Goodreads Connector', () => {
-  afterAll(async () => {
-    // Clean up pulled test books
-    await cleanupTestData('Books', 
-      (book) => book.refs?.goodreads && book.title?.startsWith('[TEST]')
-    );
-  });
-
-  describe('CSV Pull', () => {
-    it('pulls books from Goodreads CSV (dry run)', async () => {
-      const csvPath = join(fixturesDir, 'sample-export.csv');
-      const result = await aos().books.pull('goodreads', { path: csvPath, dry_run: true });
-
-      expect(result.pulled).toBeGreaterThan(0);
-      expect(result.errors).toEqual([]);
-    });
-  });
-
-  describe('Field Mapping', () => {
-    it('maps title correctly', async () => {
-      const csvPath = join(fixturesDir, 'sample-export.csv');
-      await aos().books.pull('goodreads', { path: csvPath });
-
-      const books = await aos().books.list();
-      const book = books.find(b => b.refs?.goodreads === '12345');
-
-      expect(book?.title).toBe('[TEST] The Great Gatsby');
-    });
-
-    it('strips ISBN quotes wrapper', async () => {
-      const books = await aos().books.list();
-      const book = books.find(b => b.refs?.goodreads === '12345');
-
-      // Goodreads CSVs have ISBNs like ="0743273567"
-      expect(book?.refs?.isbn).toBe('0743273567');
-    });
-
-    it('maps shelf to status', async () => {
-      const books = await aos().books.list();
-      
-      expect(books.find(b => b.refs?.goodreads === '12345')?.status).toBe('read');
-      expect(books.find(b => b.refs?.goodreads === '12346')?.status).toBe('reading');
-      expect(books.find(b => b.refs?.goodreads === '12347')?.status).toBe('want_to_read');
-    });
-  });
-});
-```
-
-### Test Fixtures
-
-Place sample data in `tests/fixtures/` within each connector:
-
-```
-connectors/goodreads/tests/fixtures/
-  goodreads-export.csv          # Full sample export
-  goodreads-isbn-quotes.csv     # Edge case: ISBN formatting
-  goodreads-shelves.csv         # Edge case: shelf mapping
-  goodreads-empty.csv           # Edge case: empty file
-```
-
-**Fixture Best Practices:**
-- Use small, focused fixtures (5-10 records max)
-- Include edge cases (empty values, special characters)
-- Use `[TEST]` prefix in titles for easy cleanup
-- Don't commit real user data
-
-### Shared Test Utilities
-
-The `tests/utils/` directory provides common helpers:
-
-```typescript
-// tests/utils/fixtures.ts - The main import for tests
-import { aos, cleanupTestData, testContent, TEST_PREFIX } from '../../../tests/utils/fixtures';
-
-// aos() - Get the global AgentOS instance (connected via setup.ts)
-const books = await aos().books.list();
-const result = await aos().books.pull('goodreads', { path, dry_run: true });
-await aos().call('Books', { action: 'list', params: { status: 'read' } });
-
-// cleanupTestData() - Remove test records after tests
-await cleanupTestData('Books');  // Removes items with [TEST] prefix
-await cleanupTestData('Books', (b) => b.refs?.goodreads != null);
-
-// testContent() - Generate unique test content
-const title = testContent('My Book');  // "[TEST] My Book 1704312000000_abc123"
-
-// TEST_PREFIX - The prefix for test data
-expect(book.title.startsWith(TEST_PREFIX)).toBe(true);
-```
-
-**The MCP connection is managed globally** - you don't need `beforeAll`/`afterAll` to connect. Just use `aos()` and it works.
-
-### Test Environment
-
-Tests run against a separate test database:
-- Location: `~/.agentos/data/test/{app}.db`
-- Set via: `AGENTOS_ENV=test`
-
-This ensures tests don't affect your real data.
-
-### Writing Good Tests
-
-1. **Test behavior, not implementation** — Test what the connector does, not how
-2. **Use fixtures** — Don't rely on external APIs in tests
-3. **Clean up after** — Delete test data created during tests
-4. **Test edge cases** — Empty files, missing fields, special characters
-5. **Keep tests fast** — Use small fixtures, mock external calls
-
-### CI Integration
-
-Tests run automatically on PR:
-
-```yaml
-# .github/workflows/test.yml
-name: Tests
-on: [push, pull_request]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-      - run: npm install
-      - run: npm test
-```
-
-### Structure Validation Tests
-
-The `tests/structure.test.ts` file automatically validates all apps and connectors:
-
-```bash
-npm test -- tests/structure.test.ts
-```
-
-**What it checks:**
-
-| For Apps | For Connectors | For Icons |
-|----------|----------------|-----------|
-| Has `readme.md` | Has `readme.md` | Uses `viewBox` |
-| Has `icon.svg` | Has yaml or icon | Uses `currentColor` |
-| Valid SVG icon | Yaml references valid app | Under 5KB |
-| Data apps have `schema:` in readme | | No hardcoded colors |
-
-These tests run automatically with `npm test` - you don't need to write them.
-
-### Adding Tests to Your Contribution
-
-When contributing an app or connector:
-
-1. Create `tests/` directory in your app/connector folder
-2. Add at least one test file (`*.test.ts`)
-3. Include fixture files if needed
-4. Run `npm test -- {your-path}` to verify
-5. Structure tests validate your files automatically
-6. All tests must pass before merge
+| To do this... | Look at... |
+|--------------|------------|
+| Create a data app | `apps/books/readme.md` |
+| Create a pass-through app | `apps/tasks/readme.md` |
+| Build a CSV connector | `apps/books/connectors/goodreads/mapping.yaml` |
+| Build a GraphQL connector | `apps/tasks/connectors/linear/mapping.yaml` |
+| Build a REST connector | `apps/finance/connectors/copilot/mapping.yaml` |
+| Add auth | `apps/tasks/connectors/linear/readme.md` |
+| Write tests | `apps/books/tests/books.test.ts` |
