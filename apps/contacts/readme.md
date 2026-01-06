@@ -114,73 +114,6 @@ actions:
         description: Contact ID
     returns: contact
 
-  create:
-    description: Create a new contact
-    params:
-      first_name:
-        type: string
-        description: First name
-      last_name:
-        type: string
-        description: Last name
-      organization:
-        type: string
-        description: Organization/company
-      job_title:
-        type: string
-        description: Job title
-      phone:
-        type: string
-        description: Phone number (auto-normalized for US)
-      phone_label:
-        type: string
-        default: mobile
-        description: Phone label
-      email:
-        type: string
-        description: Email address
-      email_label:
-        type: string
-        default: home
-        description: Email label
-      notes:
-        type: string
-        description: Notes
-    returns: contact
-
-  update:
-    description: Update contact fields
-    params:
-      id:
-        type: string
-        required: true
-        description: Contact ID
-      first_name:
-        type: string
-        description: New first name
-      last_name:
-        type: string
-        description: New last name
-      organization:
-        type: string
-        description: New organization
-      job_title:
-        type: string
-        description: New job title
-      notes:
-        type: string
-        description: New notes
-    returns: contact
-
-  delete:
-    description: Delete a contact
-    params:
-      id:
-        type: string
-        required: true
-        description: Contact ID
-    returns: void
-
   search:
     description: Search contacts by text
     readonly: true
@@ -194,13 +127,150 @@ actions:
         default: 50
     returns: contact[]
 
+  create:
+    description: Create a new contact with any schema fields
+    params:
+      # Scalar fields
+      first_name:
+        type: string
+        description: First name
+      last_name:
+        type: string
+        description: Last name
+      middle_name:
+        type: string
+        description: Middle name
+      nickname:
+        type: string
+        description: Nickname
+      organization:
+        type: string
+        description: Organization/company
+      job_title:
+        type: string
+        description: Job title
+      department:
+        type: string
+        description: Department
+      birthday:
+        type: string
+        description: Birthday (YYYY-MM-DD)
+      notes:
+        type: string
+        description: Notes
+      # Array fields - can pass multiple items on create
+      phones:
+        type: array
+        description: "Phone numbers [{label, value}]"
+      emails:
+        type: array
+        description: "Email addresses [{label, value}]"
+      urls:
+        type: array
+        description: "URLs [{label, value}]"
+      addresses:
+        type: array
+        description: "Addresses [{label, street, city, state, postal_code, country}]"
+    returns: contact
+
+  update:
+    description: Update scalar fields on a contact
+    params:
+      id:
+        type: string
+        required: true
+        description: Contact ID
+      # All scalar fields from schema
+      first_name:
+        type: string
+        description: First name
+      last_name:
+        type: string
+        description: Last name
+      middle_name:
+        type: string
+        description: Middle name
+      nickname:
+        type: string
+        description: Nickname
+      organization:
+        type: string
+        description: Organization/company
+      job_title:
+        type: string
+        description: Job title
+      department:
+        type: string
+        description: Department
+      birthday:
+        type: string
+        description: Birthday (YYYY-MM-DD)
+      notes:
+        type: string
+        description: Notes
+    returns: contact
+
+  add:
+    description: Add items to array fields (emails, phones, urls, addresses)
+    params:
+      id:
+        type: string
+        required: true
+        description: Contact ID
+      # Array fields - pass single item or array
+      emails:
+        type: object
+        description: "Email to add {label?, value}"
+      phones:
+        type: object
+        description: "Phone to add {label?, value}"
+      urls:
+        type: object
+        description: "URL to add {label?, value}"
+      addresses:
+        type: object
+        description: "Address to add {label?, street?, city?, state?, postal_code?, country?}"
+    returns: contact
+
+  remove:
+    description: Remove items from array fields by matching value
+    params:
+      id:
+        type: string
+        required: true
+        description: Contact ID
+      # Match by value field
+      emails:
+        type: object
+        description: "Email to remove {value} - matches by email address"
+      phones:
+        type: object
+        description: "Phone to remove {value} - matches by phone number"
+      urls:
+        type: object
+        description: "URL to remove {value} - matches by URL"
+      addresses:
+        type: object
+        description: "Address to remove {label} - matches by label"
+    returns: contact
+
+  delete:
+    description: Delete a contact
+    params:
+      id:
+        type: string
+        required: true
+        description: Contact ID
+    returns: void
+
 instructions: |
   When working with contacts:
-  - Use connector: "apple" for macOS Contacts (iCloud synced)
+  - Use connector: "apple-contacts" for macOS Contacts (iCloud synced)
+  - Use `update` for scalar fields (name, organization, job_title, etc.)
+  - Use `add` to append emails, phones, urls, or addresses
+  - Use `remove` to delete emails, phones, urls, or addresses by value
   - Phone numbers are normalized to E.164 format (+1XXXXXXXXXX for US)
-  - Use search for flexible queries, list for browsing
-  - URLs are auto-labeled by domain (GitHub, LinkedIn, Twitter, etc.)
-  - Notes can contain markdown
+  - URL labels auto-detected: github.com → "GitHub", linkedin.com → "LinkedIn"
 ---
 
 # Contacts
@@ -209,62 +279,86 @@ Unified contact management across Apple Contacts, Google Contacts, and other add
 
 ## Schema
 
-The `contact` entity represents a person or organization with normalized fields.
+The `contact` entity represents a person or organization with:
+- **Scalar fields**: first_name, last_name, organization, job_title, notes, etc.
+- **Array fields**: emails, phones, urls, addresses (each with label + value)
 
 ## Actions
 
-### list
+### list / get / search
 
-Browse contacts with optional filters.
+Query contacts.
 
-```
+```python
 contacts.list()                              # All contacts
 contacts.list(query: "John")                 # Search by name
 contacts.list(organization: "Stripe")        # Filter by company
-contacts.list(limit: 20)                     # Limit results
-```
-
-### get
-
-Get full contact details.
-
-```
-contacts.get(id: "ABC123:ABPerson")
-```
-
-### search
-
-Search contacts by any text (name, email, phone, organization).
-
-```
-contacts.search(query: "john@example.com")
-contacts.search(query: "512-555")            # Partial phone
-contacts.search(query: "Stripe")             # By company
+contacts.get(id: "ABC123:ABPerson")          # Full details
+contacts.search(query: "john@example.com")   # Search any field
 ```
 
 ### create
 
-Create a new contact.
+Create with any schema fields. Arrays can have multiple items.
 
-```
-contacts.create(first_name: "John", last_name: "Doe", email: "john@example.com")
-contacts.create(organization: "Acme Inc", phone: "5125551234")
+```python
+# Simple
+contacts.create(first_name: "John", last_name: "Doe")
+
+# With arrays
+contacts.create(
+  first_name: "John",
+  last_name: "Doe",
+  organization: "Acme Inc",
+  emails: [
+    {label: "work", value: "john@acme.com"},
+    {label: "home", value: "john@gmail.com"}
+  ],
+  phones: [{label: "mobile", value: "+15125551234"}]
+)
 ```
 
 ### update
 
-Update contact fields.
+Update scalar fields only. Use `add`/`remove` for arrays.
 
-```
+```python
 contacts.update(id: "ABC123", job_title: "Senior Engineer")
-contacts.update(id: "ABC123", notes: "Met at conference 2024")
+contacts.update(id: "ABC123", organization: "New Corp", notes: "Promoted 2024")
+```
+
+### add
+
+Append to array fields (emails, phones, urls, addresses).
+
+```python
+contacts.add(id: "ABC123", emails: {label: "work", value: "john@work.com"})
+contacts.add(id: "ABC123", phones: {label: "home", value: "+15125559999"})
+contacts.add(id: "ABC123", urls: {label: "LinkedIn", value: "https://linkedin.com/in/john"})
+contacts.add(id: "ABC123", addresses: {
+  label: "home",
+  street: "123 Main St",
+  city: "Austin",
+  state: "TX",
+  postal_code: "78701"
+})
+```
+
+### remove
+
+Remove from array fields by matching value.
+
+```python
+contacts.remove(id: "ABC123", emails: {value: "old@email.com"})
+contacts.remove(id: "ABC123", phones: {value: "+15125551234"})
+contacts.remove(id: "ABC123", addresses: {label: "old home"})  # addresses match by label
 ```
 
 ### delete
 
 Delete a contact.
 
-```
+```python
 contacts.delete(id: "ABC123")
 ```
 
@@ -272,7 +366,7 @@ contacts.delete(id: "ABC123")
 
 | Connector | Features | Notes |
 |-----------|----------|-------|
-| `apple` | Full CRUD, photos, multiple values | macOS only, uses SQL reads + AppleScript writes |
+| `apple-contacts` | Full CRUD, photos, multiple values | macOS only, AppleScript writes |
 
 ## Future Connectors
 

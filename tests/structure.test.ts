@@ -309,6 +309,87 @@ describe('Icon Quality', () => {
 });
 
 // =============================================================================
+// MAPPING.YAML AUDIT TESTS (AGE-267)
+// =============================================================================
+
+/**
+ * AGE-267 Audit Findings:
+ * 
+ * DECISION: ELIMINATE mapping.yaml → merge into connector readme.md frontmatter
+ * 
+ * Current state (to be migrated):
+ * - 20 connectors have mapping.yaml
+ * - Executor types: rest (3), graphql (2), sql (9), csv (1), app (2), 
+ *   command (4), swift (1), applescript (1)
+ * 
+ * Target state:
+ * - Connector readme.md frontmatter contains everything:
+ *   - id, name, description, icon, auth config
+ *   - actions: { ... executor implementations ... }
+ * - No separate mapping.yaml file
+ * 
+ * Benefits:
+ * 1. One file per connector (simpler)
+ * 2. Consistent with app readme.md pattern (schema+actions in frontmatter)
+ * 3. Less duplication/confusion
+ * 
+ * Migration: AGE-268+ will handle the actual migration
+ */
+
+describe('Mapping.yaml Migration Status (AGE-267)', () => {
+  const connectors = getConnectors();
+  
+  // Track current state for migration planning
+  const hasMappingYaml: string[] = [];
+  const hasActionsInReadme: string[] = [];
+  
+  for (const { app, connector, dir } of connectors) {
+    const mappingPath = join(dir, 'mapping.yaml');
+    const readmePath = join(dir, 'readme.md');
+    const connectorId = `${app}/${connector}`;
+    
+    if (existsSync(mappingPath)) {
+      hasMappingYaml.push(connectorId);
+    }
+    
+    if (existsSync(readmePath)) {
+      const readme = readFileSync(readmePath, 'utf-8');
+      // Check if readme already has actions in frontmatter (future state)
+      if (/^actions:/m.test(readme)) {
+        hasActionsInReadme.push(connectorId);
+      }
+    }
+  }
+  
+  it('documents current mapping.yaml usage', () => {
+    console.log('\n📊 mapping.yaml Migration Status:');
+    console.log(`  Connectors with mapping.yaml: ${hasMappingYaml.length}`);
+    console.log(`  Connectors with actions in readme: ${hasActionsInReadme.length}`);
+    console.log(`  Connectors to migrate: ${hasMappingYaml.length - hasActionsInReadme.length}`);
+    expect(true).toBe(true);
+  });
+  
+  // Future test: once migration is complete, this should pass
+  it.skip('all connectors have actions in readme.md (post-migration)', () => {
+    for (const { app, connector, dir } of connectors) {
+      const readmePath = join(dir, 'readme.md');
+      if (existsSync(readmePath)) {
+        const readme = readFileSync(readmePath, 'utf-8');
+        expect(readme).toMatch(/^actions:/m);
+      }
+    }
+  });
+  
+  // Future test: once migration is complete, no mapping.yaml should exist
+  it.skip('no mapping.yaml files exist (post-migration)', () => {
+    for (const { app, connector, dir } of connectors) {
+      const mappingPath = join(dir, 'mapping.yaml');
+      expect(existsSync(mappingPath)).toBe(false);
+    }
+  });
+});
+
+// =============================================================================
 // FILE HYGIENE (always checked)
 // =============================================================================
 

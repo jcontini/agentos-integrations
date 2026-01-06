@@ -353,9 +353,58 @@ npm test -- apps/books      # Run app tests
 npm test -- --watch         # Watch mode
 ```
 
-Tests live with the code they test:
-- `apps/books/tests/books.test.ts`
-- `apps/books/connectors/goodreads/tests/pull.test.ts`
+### Test Requirements
+
+**Every connector MUST have CRUD tests before being committed.** Tests live with the code they test:
+
+```
+apps/tasks/
+  tests/
+    tasks.test.ts                    ← Shared test helpers
+  connectors/
+    todoist/
+      tests/
+        todoist.test.ts              ← Connector-specific tests
+    linear/
+      tests/
+        linear.test.ts
+```
+
+### Required Tests per Connector
+
+At minimum, each connector must test:
+
+| Action | Test |
+|--------|------|
+| `list` | Returns array, respects limit, fields match schema |
+| `get` | Returns single item by ID |
+| `create` | Creates item, returns ID (if not read-only) |
+| `update` | Updates fields (if not read-only) |
+| `delete` | Removes item (if not read-only) |
+
+### Test Data Convention
+
+Use `[TEST]` prefix for test data:
+```typescript
+import { testContent, TEST_PREFIX } from '../../../tests/utils/fixtures';
+
+const title = testContent('my task');  // → "[TEST] my task abc123"
+```
+
+This enables automatic cleanup and easy identification of test data.
+
+### Running Connector Tests
+
+```bash
+# Test specific connector
+npm test -- apps/tasks/connectors/todoist
+
+# Test all connectors for an app
+npm test -- apps/tasks
+
+# Watch mode for development
+npm test -- apps/tasks/connectors/todoist --watch
+```
 
 ---
 
