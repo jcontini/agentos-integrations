@@ -263,17 +263,16 @@ actions:
     returns: void
 
 instructions: |
-  The Books app manages your reading library with pull/push capabilities.
+  The Books app connects to book tracking services like Goodreads and Hardcover.
   
   **Getting started:**
   1. Pull your Goodreads library: `Books(action: "pull", connector: "goodreads", path: "~/Downloads/goodreads_library_export.csv")`
-  2. View your library: `Books(action: "list")` (defaults to local library)
-  3. Update a book: `Books(action: "update", id: "...", rating: 5, status: "read")`
+  2. Pull from Hardcover: `Books(action: "pull", connector: "hardcover")`
+  3. Push to Hardcover: `Books(action: "push", connector: "hardcover")`
   
   **Connectors:**
-  - `local` - Your local library (default for list/get/create/update/delete)
-  - `goodreads` - Pull only (CSV import, no API)
-  - `hardcover` - Pull and push (API)
+  - `goodreads` - Pull from CSV export
+  - `hardcover` - Pull and push via API
 ---
 
 # Books
@@ -291,28 +290,10 @@ Track your reading library - pull from Goodreads, push to Hardcover, search Goog
 Books(action: "pull", connector: "goodreads", path: "~/Downloads/goodreads_library_export.csv")
 ```
 
-### Browse Your Library
+### Pull from Hardcover
 
 ```
-Books(action: "list")                           # All books (uses local library by default)
-Books(action: "list", status: "read")           # Books you've read
-Books(action: "list", status: "reading")        # Currently reading
-Books(action: "list", rating: 4)                # 4+ star books
-Books(action: "list", search: "Sanderson")      # Search by title/author
-```
-
-### Update Books
-
-```
-Books(action: "update", id: "abc123", rating: 5, review: "Loved it!")
-Books(action: "update", id: "abc123", status: "read", date_finished: "2024-01-15")
-```
-
-### Search for New Books
-
-```
-Books(action: "search", query: "Project Hail Mary")
-Books(action: "search", query: "isbn:9780593135204")
+Books(action: "pull", connector: "hardcover")   # Pull your library
 ```
 
 ### Push to Hardcover
@@ -340,14 +321,7 @@ Books(action: "push", connector: "hardcover")                   # Push
 
 ## Connectors
 
-| Connector | List/Get | Create/Update | Pull | Push | Notes |
-|-----------|----------|---------------|------|------|-------|
-| `local` | ✅ | ✅ | - | - | Default. Your local SQLite library |
-| `goodreads` | ❌ | ❌ | ✅ CSV | ❌ | Import from CSV export |
-| `hardcover` | ❌ | ❌ | ✅ | ✅ | Full API support |
-
-## Data Storage
-
-Books are stored locally in `~/.agentos/data/books.db` (SQLite).
-
-Your reading data stays on your machine - only pushed to external services when you explicitly push.
+| Connector | Pull | Push | Notes |
+|-----------|------|------|-------|
+| `goodreads` | ✅ CSV | ❌ | Import from CSV export |
+| `hardcover` | ✅ | ✅ | Full API support |

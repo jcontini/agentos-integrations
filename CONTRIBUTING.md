@@ -11,13 +11,13 @@
 ┌─────────────────────────────────────────────────────────────────────┐
 │  APPS: Tasks • Books • Messages • Calendar • Finance • Databases   │
 │  Location: apps/{app}/readme.md                                     │
-│    - Schema (YAML) auto-generates database tables                   │
+│    - Schema defines the data contract                               │
 │    - Actions define what the app can do                             │
 └─────────────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│  CONNECTORS: todoist • linear • goodreads • hardcover • postgres   │
+│  CONNECTORS: todoist • linear • goodreads • postgres • copilot     │
 │  Location: apps/{app}/connectors/{connector}/readme.md              │
 │    - Auth config + action implementations in YAML frontmatter       │
 │    - Maps unified actions to service-specific APIs                  │
@@ -25,16 +25,16 @@
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│  EXECUTORS: rest: • graphql: • sql: • csv: • command: • app:       │
+│  EXECUTORS: rest: • graphql: • sql: • csv: • command: • swift:     │
 │  Location: AgentOS Core (Rust) — you don't modify these            │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
 **Every action requires a `connector` parameter:**
 ```
-Books(action: "list", connector: "local")     → Local SQLite
-Books(action: "pull", connector: "goodreads") → Goodreads CSV
-Tasks(action: "list", connector: "linear")    → Linear API
+Tasks(action: "list", connector: "linear")    → Linear GraphQL API
+Books(action: "pull", connector: "goodreads") → Goodreads CSV import
+Finance(action: "list", connector: "copilot") → Copilot REST API
 ```
 
 ---
@@ -44,7 +44,7 @@ Tasks(action: "list", connector: "linear")    → Linear API
 ```
 apps/
   books/
-    readme.md           ← Schema + actions (auto-generates DB)
+    readme.md           ← Schema + actions
     icon.svg            ← App icon (required)
     connectors/
       goodreads/
@@ -77,7 +77,7 @@ schema:
   book:
     id: { type: string, required: true }
     title: { type: string, required: true }
-    # ... fields define database columns
+    # ... more fields
 
 actions:
   list:
@@ -175,10 +175,10 @@ Human-readable docs about this connector.
 |----------|----------|---------|
 | `rest:` | REST APIs | `apps/finance/connectors/copilot/readme.md` |
 | `graphql:` | GraphQL APIs | `apps/tasks/connectors/linear/readme.md` |
-| `csv:` | CSV file import | `apps/books/connectors/goodreads/readme.md` |
+| `csv:` | CSV file parsing | `apps/books/connectors/goodreads/readme.md` |
 | `sql:` | Database queries | `apps/databases/connectors/postgres/readme.md` |
-| `app:` | Local DB operations | Used in pull workflows |
 | `command:` | CLI tools | `apps/files/connectors/macos/readme.md` |
+| `swift:` | macOS Swift scripts | `apps/calendar/connectors/apple-calendar/readme.md` |
 
 ### REST executor
 
@@ -367,9 +367,9 @@ const title = testContent('my task');  // → "[TEST] my task abc123"
 
 | To do this... | Look at... |
 |--------------|------------|
-| Create a data app | `apps/books/readme.md` |
-| Create a pass-through app | `apps/tasks/readme.md` |
+| Create an app | `apps/books/readme.md` |
 | Build a CSV connector | `apps/books/connectors/goodreads/readme.md` |
 | Build a GraphQL connector | `apps/tasks/connectors/linear/readme.md` |
 | Build a REST connector | `apps/finance/connectors/copilot/readme.md` |
+| Build a Swift connector | `apps/calendar/connectors/apple-calendar/readme.md` |
 | Write tests | `apps/tasks/connectors/linear/tests/linear.test.ts` |

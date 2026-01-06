@@ -53,36 +53,40 @@ npm test -- --watch                # Watch mode
 
 ## Writing App Tests
 
-Test that the app's schema and CRUD work correctly:
+Test that the app's actions work correctly:
 
 ```typescript
-// apps/books/tests/books.test.ts
+// apps/tasks/tests/tasks.test.ts
 import { describe, it, expect, afterAll } from 'vitest';
-import { aos, cleanupTestData, TEST_PREFIX } from '../../../tests/utils/fixtures';
+import { aos, cleanupTestData, TEST_PREFIX, testContent } from '../../../tests/utils/fixtures';
 
-describe('Books App', () => {
+describe('Tasks App', () => {
   afterAll(async () => {
-    await cleanupTestData('Books');
+    await cleanupTestData('Tasks');
   });
 
-  it('can list all books', async () => {
-    const books = await aos().books.list();
-    expect(Array.isArray(books)).toBe(true);
+  it('can list tasks', async () => {
+    const tasks = await aos().tasks.list({ connector: 'linear' });
+    expect(Array.isArray(tasks)).toBe(true);
   });
 
-  it('can filter by status', async () => {
-    const books = await aos().books.list({ status: 'read' });
-    books.forEach(book => {
-      expect(book.status).toBe('read');
-    });
-  });
-
-  it('books have required fields', async () => {
-    const books = await aos().books.list({ limit: 10 });
-    for (const book of books) {
-      expect(book.id).toBeDefined();
-      expect(book.title).toBeDefined();
+  it('tasks have required fields', async () => {
+    const tasks = await aos().tasks.list({ connector: 'linear', limit: 10 });
+    for (const task of tasks) {
+      expect(task.id).toBeDefined();
+      expect(task.title).toBeDefined();
     }
+  });
+
+  it('can create and complete a task', async () => {
+    const title = testContent('Test task');
+    const task = await aos().tasks.create({ 
+      connector: 'linear',
+      title 
+    });
+    expect(task.id).toBeDefined();
+    
+    await aos().tasks.complete({ connector: 'linear', id: task.id });
   });
 });
 ```
@@ -178,9 +182,10 @@ connectors/goodreads/tests/fixtures/
 
 ## Test Environment
 
-Tests run against a separate database:
-- Location: `~/.agentos/data/test/{app}.db`
+Tests run in a separate environment:
 - Set via: `AGENTOS_ENV=test`
+- Test data uses `[TEST]` prefix for identification
+- Use `cleanupTestData()` to remove test records
 
 Your real data is never affected.
 

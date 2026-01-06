@@ -65,13 +65,6 @@ actions:
             review: "[].review_raw"
             date_added: "[].date_added"
             hardcover_id: "[].book.id | to_string"
-      as: records
-    - app:
-        action: upsert
-        table: books
-        data: "{{records}}"
-        on_conflict:
-          - hardcover_id
 
   push:
     - graphql:

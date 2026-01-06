@@ -56,14 +56,6 @@ actions:
               publisher: "[].'Publisher'"
               year_published: "[].'Year Published'"
               original_year: "[].'Original Publication Year'"
-      as: records
-    
-    - app:
-        action: upsert
-        table: books
-        on_conflict:
-          - goodreads_id
-        data: "{{records}}"
 ---
 
 # Goodreads Connector

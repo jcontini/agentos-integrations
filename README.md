@@ -12,7 +12,7 @@ Open-source apps and connectors for [AgentOS](https://github.com/jcontini/agento
                               ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │  APPS: Tasks • Databases • Messages • Calendar • Finance • Web     │
-│  Location: apps/{app}/readme.md (schema + actions)                  │
+│  Location: apps/{app}/readme.md — schema + actions                  │
 └─────────────────────────────────────────────────────────────────────┘
                               │
                               ▼
@@ -23,7 +23,7 @@ Open-source apps and connectors for [AgentOS](https://github.com/jcontini/agento
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│  EXECUTORS: rest: • graphql: • sql: • applescript: • swift:        │
+│  EXECUTORS: rest: • graphql: • sql: • swift: • csv: • command:     │
 │  Location: AgentOS Core (Rust)                                      │
 └─────────────────────────────────────────────────────────────────────┘
 ```
