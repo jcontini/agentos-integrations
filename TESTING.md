@@ -30,7 +30,7 @@ apps/
         sample-books.json
     connectors/
       goodreads/
-        mapping.yaml
+        readme.md              ← Auth + actions in frontmatter
         tests/
           pull.test.ts         ← Connector tests
           fixtures/
@@ -186,6 +186,26 @@ Your real data is never affected.
 
 ---
 
+## Pre-commit Hook
+
+A pre-commit hook runs automatically when you commit:
+
+1. **Structure tests** — validates all apps/connectors have required files
+2. **Dynamic app tests** — runs tests only for changed apps/connectors
+
+**Progressive enforcement:** If you modify an app or connector, you must have tests for it. Untouched code won't block your commit.
+
+```bash
+# What happens on commit:
+git commit -m "Update linear connector"
+# → Runs structure tests (fast)
+# → Detects apps/tasks/connectors/linear was changed
+# → Runs apps/tasks/connectors/linear/tests/*.test.ts
+# → Commit succeeds if tests pass
+```
+
+---
+
 ## Structure Validation
 
 The `tests/structure.test.ts` file automatically validates all apps and connectors:
@@ -199,10 +219,8 @@ npm test -- tests/structure.test.ts
 | For Apps | For Connectors | For Icons |
 |----------|----------------|-----------|
 | Has `readme.md` | Has `readme.md` | Uses `viewBox` |
-| Has `icon.svg` | Has `mapping.yaml` or icon | Uses `currentColor` |
-| Valid SVG icon | References valid app | Under 5KB |
-
-These run automatically — you don't write them.
+| Has `icon.svg` | Has actions in frontmatter | Uses `currentColor` |
+| Has schema/actions | Has icon | Under 5KB |
 
 ---
 
@@ -214,4 +232,4 @@ When contributing:
 2. Add at least one test file (`*.test.ts`)
 3. Include fixture files if needed
 4. Run `npm test -- {your-path}` to verify
-5. All tests must pass before merge
+5. Pre-commit hook enforces tests for changed code

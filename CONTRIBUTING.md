@@ -18,9 +18,9 @@
                               ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │  CONNECTORS: todoist • linear • goodreads • hardcover • postgres   │
-│  Location: apps/{app}/connectors/{connector}/mapping.yaml          │
+│  Location: apps/{app}/connectors/{connector}/readme.md              │
+│    - Auth config + action implementations in YAML frontmatter       │
 │    - Maps unified actions to service-specific APIs                  │
-│    - Transforms responses to app schema                             │
 └─────────────────────────────────────────────────────────────────────┘
                               │
                               ▼
@@ -48,12 +48,10 @@ apps/
     icon.svg            ← App icon (required)
     connectors/
       goodreads/
-        readme.md       ← Auth config
-        mapping.yaml    ← Action implementations
+        readme.md       ← Auth config + action implementations
         icon.png
       hardcover/
         readme.md
-        mapping.yaml
         icon.png
     tests/
       books.test.ts     ← App tests
@@ -129,35 +127,30 @@ updated_at: { type: datetime }
 
 ## Creating a Connector
 
-**Reference:** See `apps/books/connectors/goodreads/mapping.yaml` for CSV import, `apps/tasks/connectors/linear/mapping.yaml` for GraphQL API.
+**Reference:** See `apps/tasks/connectors/linear/readme.md` for GraphQL API, `apps/finance/connectors/copilot/readme.md` for REST API.
 
 ### Connector structure
 
 ```
 apps/books/connectors/goodreads/
-  readme.md       ← Auth config
-  mapping.yaml    ← Action implementations
+  readme.md       ← Auth config + action implementations (YAML frontmatter)
   icon.png        ← Service icon
 ```
 
-### Auth configuration (readme.md)
+### Connector readme.md
+
+Everything goes in YAML frontmatter — auth config and action implementations:
 
 ```yaml
-# API key auth
+---
+name: Linear
 auth:
   type: api_key
   header: Authorization
   prefix: "Bearer "
   label: API Token
-  help_url: https://service.com/api-docs
+  help_url: https://linear.app/settings/api
 
-# No auth needed (file imports)
-auth: null
-```
-
-### Action mapping (mapping.yaml)
-
-```yaml
 actions:
   list:
     graphql:
@@ -167,6 +160,11 @@ actions:
         mapping:
           id: "[].id"
           title: "[].name"
+---
+
+# Linear
+
+Human-readable docs about this connector.
 ```
 
 ---
@@ -175,12 +173,12 @@ actions:
 
 | Executor | Use case | Example |
 |----------|----------|---------|
-| `rest:` | REST APIs | `apps/finance/connectors/copilot/mapping.yaml` |
-| `graphql:` | GraphQL APIs | `apps/tasks/connectors/linear/mapping.yaml` |
-| `csv:` | CSV file import | `apps/books/connectors/goodreads/mapping.yaml` |
-| `sql:` | Database queries | `apps/databases/connectors/postgres/mapping.yaml` |
+| `rest:` | REST APIs | `apps/finance/connectors/copilot/readme.md` |
+| `graphql:` | GraphQL APIs | `apps/tasks/connectors/linear/readme.md` |
+| `csv:` | CSV file import | `apps/books/connectors/goodreads/readme.md` |
+| `sql:` | Database queries | `apps/databases/connectors/postgres/readme.md` |
 | `app:` | Local DB operations | Used in pull workflows |
-| `command:` | CLI tools | `apps/files/connectors/macos/mapping.yaml` |
+| `command:` | CLI tools | `apps/files/connectors/macos/readme.md` |
 
 ### REST executor
 
@@ -256,7 +254,7 @@ actions:
             stateId: "{{lookup.data.issue.team.states.nodes[0].id}}"
 ```
 
-**See:** `apps/tasks/connectors/linear/mapping.yaml` for real chained executor examples.
+**See:** `apps/tasks/connectors/linear/readme.md` for real chained executor examples.
 
 ---
 
@@ -345,42 +343,14 @@ Every app and connector needs an icon.
 
 See [TESTING.md](./TESTING.md) for the full testing guide.
 
-**Quick start:**
+**Pre-commit hook enforces tests.** If you modify an app or connector, you must have tests for it.
+
 ```bash
 npm install
 npm test                    # Run all tests
 npm test -- apps/books      # Run app tests
 npm test -- --watch         # Watch mode
 ```
-
-### Test Requirements
-
-**Every connector MUST have CRUD tests before being committed.** Tests live with the code they test:
-
-```
-apps/tasks/
-  tests/
-    tasks.test.ts                    ← Shared test helpers
-  connectors/
-    todoist/
-      tests/
-        todoist.test.ts              ← Connector-specific tests
-    linear/
-      tests/
-        linear.test.ts
-```
-
-### Required Tests per Connector
-
-At minimum, each connector must test:
-
-| Action | Test |
-|--------|------|
-| `list` | Returns array, respects limit, fields match schema |
-| `get` | Returns single item by ID |
-| `create` | Creates item, returns ID (if not read-only) |
-| `update` | Updates fields (if not read-only) |
-| `delete` | Removes item (if not read-only) |
 
 ### Test Data Convention
 
@@ -391,21 +361,6 @@ import { testContent, TEST_PREFIX } from '../../../tests/utils/fixtures';
 const title = testContent('my task');  // → "[TEST] my task abc123"
 ```
 
-This enables automatic cleanup and easy identification of test data.
-
-### Running Connector Tests
-
-```bash
-# Test specific connector
-npm test -- apps/tasks/connectors/todoist
-
-# Test all connectors for an app
-npm test -- apps/tasks
-
-# Watch mode for development
-npm test -- apps/tasks/connectors/todoist --watch
-```
-
 ---
 
 ## Quick Reference
@@ -414,8 +369,7 @@ npm test -- apps/tasks/connectors/todoist --watch
 |--------------|------------|
 | Create a data app | `apps/books/readme.md` |
 | Create a pass-through app | `apps/tasks/readme.md` |
-| Build a CSV connector | `apps/books/connectors/goodreads/mapping.yaml` |
-| Build a GraphQL connector | `apps/tasks/connectors/linear/mapping.yaml` |
-| Build a REST connector | `apps/finance/connectors/copilot/mapping.yaml` |
-| Add auth | `apps/tasks/connectors/linear/readme.md` |
-| Write tests | `apps/books/tests/books.test.ts` |
+| Build a CSV connector | `apps/books/connectors/goodreads/readme.md` |
+| Build a GraphQL connector | `apps/tasks/connectors/linear/readme.md` |
+| Build a REST connector | `apps/finance/connectors/copilot/readme.md` |
+| Write tests | `apps/tasks/connectors/linear/tests/linear.test.ts` |
