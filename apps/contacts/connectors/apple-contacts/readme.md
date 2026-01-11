@@ -29,6 +29,12 @@ instructions: |
   2. `Contacts.list(account: "ABC-123-UUID", limit: 10)`
   3. `Contacts.create(account: "ABC-123-UUID", first_name: "John", ...)`
   
+  **Performance:**
+  - The `list` response includes phones, emails, urls, has_photo, organization, job_title
+  - Only call `get` when you need addresses, notes, birthday, or full label info
+  - Phones/emails/urls in list are comma-separated strings (use `get` for label details)
+  - Each tool call adds latency, so use list data first before calling get
+  
   **Notes:**
   - Contact IDs can change after iCloud sync - query by name after create
   - Phone numbers are auto-normalized: 5125551234 → +15125551234
@@ -105,37 +111,44 @@ actions:
       database: "~/Library/Application Support/AddressBook/Sources/{{params.account}}/AddressBook-v22.abcddb"
       query: |
         SELECT 
-          ZUNIQUEID as id,
-          ZFIRSTNAME as first_name,
-          ZLASTNAME as last_name,
-          ZMIDDLENAME as middle_name,
-          ZNICKNAME as nickname,
-          ZORGANIZATION as organization,
-          ZJOBTITLE as job_title,
-          ZDEPARTMENT as department,
-          COALESCE(ZFIRSTNAME || ' ' || ZLASTNAME, ZORGANIZATION, ZFIRSTNAME, ZLASTNAME) as display_name,
-          datetime(ZMODIFICATIONDATE + 978307200, 'unixepoch') as modified_at,
-          datetime(ZCREATIONDATE + 978307200, 'unixepoch') as created_at,
-          CASE WHEN ZTHUMBNAILIMAGEDATA IS NOT NULL THEN 1 ELSE 0 END as has_photo
-        FROM ZABCDRECORD
-        WHERE ZUNIQUEID LIKE '%:ABPerson'
+          r.ZUNIQUEID as id,
+          r.ZFIRSTNAME as first_name,
+          r.ZLASTNAME as last_name,
+          r.ZMIDDLENAME as middle_name,
+          r.ZNICKNAME as nickname,
+          r.ZORGANIZATION as organization,
+          r.ZJOBTITLE as job_title,
+          r.ZDEPARTMENT as department,
+          COALESCE(r.ZFIRSTNAME || ' ' || r.ZLASTNAME, r.ZORGANIZATION, r.ZFIRSTNAME, r.ZLASTNAME) as display_name,
+          datetime(r.ZMODIFICATIONDATE + 978307200, 'unixepoch') as modified_at,
+          datetime(r.ZCREATIONDATE + 978307200, 'unixepoch') as created_at,
+          CASE WHEN r.ZTHUMBNAILIMAGEDATA IS NOT NULL THEN 1 ELSE 0 END as has_photo,
+          GROUP_CONCAT(DISTINCT p.ZFULLNUMBER) as phones,
+          GROUP_CONCAT(DISTINCT e.ZADDRESS) as emails,
+          GROUP_CONCAT(DISTINCT u.ZURL) as urls
+        FROM ZABCDRECORD r
+        LEFT JOIN ZABCDPHONENUMBER p ON p.ZOWNER = r.Z_PK
+        LEFT JOIN ZABCDEMAILADDRESS e ON e.ZOWNER = r.Z_PK
+        LEFT JOIN ZABCDURLADDRESS u ON u.ZOWNER = r.Z_PK
+        WHERE r.ZUNIQUEID LIKE '%:ABPerson'
           AND (
             '{{params.query}}' = '' 
-            OR ZFIRSTNAME LIKE '%{{params.query}}%'
-            OR ZLASTNAME LIKE '%{{params.query}}%'
-            OR ZORGANIZATION LIKE '%{{params.query}}%'
+            OR r.ZFIRSTNAME LIKE '%{{params.query}}%'
+            OR r.ZLASTNAME LIKE '%{{params.query}}%'
+            OR r.ZORGANIZATION LIKE '%{{params.query}}%'
           )
           AND (
             '{{params.organization}}' = ''
-            OR ZORGANIZATION LIKE '%{{params.organization}}%'
+            OR r.ZORGANIZATION LIKE '%{{params.organization}}%'
           )
+        GROUP BY r.Z_PK
         ORDER BY 
           CASE '{{params.sort | default: modified}}'
-            WHEN 'modified' THEN ZMODIFICATIONDATE
-            WHEN 'created' THEN ZCREATIONDATE
+            WHEN 'modified' THEN r.ZMODIFICATIONDATE
+            WHEN 'created' THEN r.ZCREATIONDATE
             ELSE NULL
           END DESC,
-          CASE WHEN '{{params.sort | default: modified}}' NOT IN ('modified', 'created') THEN COALESCE(ZLASTNAME, ZFIRSTNAME, ZORGANIZATION) END
+          CASE WHEN '{{params.sort | default: modified}}' NOT IN ('modified', 'created') THEN COALESCE(r.ZLASTNAME, r.ZFIRSTNAME, r.ZORGANIZATION) END
         LIMIT {{params.limit | default: 50}}
       response:
         mapping:
@@ -151,6 +164,9 @@ actions:
           modified_at: "[].modified_at"
           created_at: "[].created_at"
           has_photo: "[].has_photo"
+          phones: "[].phones"
+          emails: "[].emails"
+          urls: "[].urls"
           connector: "'apple-contacts'"
 
   search:
@@ -682,6 +698,49 @@ actions:
 
 Access macOS Contacts via native APIs with multi-account support.
 
+## ⚡ IMPORTANT: Use `list` First, Avoid Unnecessary `get` Calls
+
+**The `list` action returns phones, emails, urls, has_photo, organization, job_title.**
+
+Each tool call adds latency. Don't call `get` on every contact just to check phone numbers — that data is already in the `list` response!
+
+### list response includes:
+```json
+{
+  "id": "ABC-123:ABPerson",
+  "display_name": "Jane Smith",
+  "first_name": "Jane",
+  "last_name": "Smith",
+  "organization": "Acme Corp",
+  "job_title": "Engineer",
+  "has_photo": 1,
+  "phones": "+15125551234,+15129876543",
+  "emails": "jane@acme.com,jane@gmail.com",
+  "urls": "https://linkedin.com/in/jane",
+  "modified_at": "2026-01-11 12:00:00"
+}
+```
+
+### Only call `get` when you need:
+- **addresses** (street, city, state, postal_code, country)
+- **notes**
+- **birthday**
+- **label details** (phones/emails in list are values only, get returns label+value pairs)
+
+### Example: Find contacts without photos who have phone numbers
+```
+# ✅ GOOD: One list call, filter in memory
+contacts = Contacts.list(account: "...", limit: 50)
+no_photo_with_phone = [c for c in contacts if not c.has_photo and c.phones]
+
+# ❌ BAD: Calling get on each contact
+contacts = Contacts.list(...)
+for c in contacts:
+    details = Contacts.get(id: c.id)  # Unnecessary! phones already in list
+```
+
+---
+
 ## Requirements
 
 - **macOS only**
@@ -705,18 +764,18 @@ macOS can have multiple contact accounts (iCloud, local, Exchange, etc.). Use th
    → Returns: [{id: "ABC-123", name: "iCloud", count: 500, is_default: true}, ...]
 
 2. Contacts.list(account: "ABC-123", limit: 10)
-   → Returns: 10 most recently modified contacts from that account
+   → Returns: 10 most recently modified contacts with phones, emails, urls included
 
-3. Contacts.create(account: "ABC-123", first_name: "John", last_name: "Doe")
-   → Creates contact in the specified account
+3. Contacts.get(id: "ABC-123:ABPerson")
+   → Only if you need addresses, notes, or birthday
 ```
 
 ## Features
 
 - **accounts** - List available contact accounts (iCloud, local, work, etc.)
-- **list** - List contacts with sorting (modified, created, name)
+- **list** - List contacts with phones, emails, urls, has_photo (use this first!)
 - **search** - Search contacts by name, email, phone, or organization
-- **get** - Get full contact details including `has_photo` field
+- **get** - Get full details: addresses, notes, birthday, label info
 - **create** - Create new contacts in specific account
 - **update** - Update contact scalar fields
 - **add/remove** - Add or remove emails, phones, URLs, addresses
