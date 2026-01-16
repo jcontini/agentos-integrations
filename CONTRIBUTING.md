@@ -75,6 +75,32 @@ ORDER BY CASE '{{params.sort | default: modified}}' WHEN 'modified' THEN ...
 pkill -9 agentos       # Kill process, will restart on next call
 ```
 
+### 4. Never silently pick from arrays
+
+When resolving from arrays (vehicles, addresses, bank accounts), **never** silently pick the first item—the wrong choice can have real consequences.
+
+```yaml
+# ❌ DANGEROUS - could renew wrong vehicle registration!
+vehicle: "{{profile.vehicles[0]}}"
+
+# ✅ SAFE - require explicit selection or unambiguous match
+resolve:
+  source: profile.vehicles
+  select_by:
+    - params.vin            # 1. Explicit value in params
+    - params.vehicle_label  # 2. By label/name
+    - count: 1              # 3. Only one exists (unambiguous)
+  on_ambiguous:
+    error: "Multiple vehicles found. Please specify which one."
+    prompt:
+      field: "vehicle_label"
+      options: "{{profile.vehicles | map: 'label'}}"
+```
+
+**Resolution order:** explicit param → by label → singleton → **fail with options**.
+
+This applies to ALL profile arrays: vehicles, addresses, bank accounts, phone numbers, passports (dual citizens), etc.
+
 ---
 
 ## Quick Reference
