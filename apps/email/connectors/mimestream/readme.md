@@ -4,6 +4,7 @@ name: Mimestream
 description: Read emails from Mimestream macOS email client
 icon: icon.png
 color: "#3B82F6"
+tags: [email, mail, inbox]
 
 website: https://mimestream.com
 platform: macos
