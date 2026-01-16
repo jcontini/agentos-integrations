@@ -2,12 +2,6 @@
   "yaml.schemas": {
     "./tests/connector.schema.json": "apps/*/readme.md"
   },
-  "yaml.customTags": [
-    "!include scalar"
-  ],
-  "[yaml]": {
-    "editor.defaultFormatter": "redhat.vscode-yaml"
-  },
   "files.associations": {
     "apps/*/readme.md": "yaml"
   }

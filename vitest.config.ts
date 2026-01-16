@@ -2,14 +2,13 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    // Look for tests in apps, connectors, and shared tests directories
+    // Look for tests in apps and tests directories
     include: [
       'apps/**/tests/**/*.test.ts',
-      'connectors/**/tests/**/*.test.ts',
-      'tests/**/*.test.ts',  // Shared tests like structure validation
+      'tests/**/*.test.ts',
     ],
     
-    // Setup file runs in same process as tests (unlike globalSetup)
+    // Setup file runs in same process as tests
     setupFiles: ['./tests/setup.ts'],
     
     // Test environment

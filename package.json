@@ -6,8 +6,6 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage",
     "test:schema": "vitest run tests/schema.test.ts",
     "validate": "node tests/scripts/validate-schema.mjs --all",
     "test:changed": "./tests/scripts/test-changed.sh --staged",
