@@ -47,6 +47,7 @@ export function Markdown({
     return (
       <div className={`markdown markdown--loading ${className}`} aria-busy="true">
         <div className="markdown-loading">
+          <div className="progress-bar" role="progressbar" aria-label="Loading content..." />
           <span className="markdown-loading-text">Loading content...</span>
         </div>
       </div>

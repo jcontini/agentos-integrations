@@ -62,6 +62,7 @@ views:
           - component: markdown
             props:
               content: "{{activity.response.content}}"
+              loading: "{{activity.pending}}"
         footer:
           source: "{{activity.connector}}"
           duration: "{{activity.duration_ms}}"
