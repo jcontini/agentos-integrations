@@ -35,10 +35,14 @@ interface UrlBarProps {
   source?: string;
   /** Source plugin icon URL */
   sourceIcon?: string;
-  /** Can navigate back (aesthetic, always disabled in observation mode) */
+  /** Can navigate back in history */
   canGoBack?: boolean;
-  /** Can navigate forward (aesthetic, always disabled in observation mode) */
+  /** Can navigate forward in history */
   canGoForward?: boolean;
+  /** Callback when back button clicked */
+  onBack?: () => void;
+  /** Callback when forward button clicked */
+  onForward?: () => void;
 }
 
 // Simple SVG icons - inline to avoid external dependencies
@@ -93,36 +97,40 @@ export function UrlBar({
   sourceIcon,
   canGoBack = false,
   canGoForward = false,
+  onBack,
+  onForward,
 }: UrlBarProps) {
-  // In observation mode, all nav buttons are disabled
-  // They're here for aesthetic completeness and future interactivity
-  const isObservationMode = true;
+  // Navigation is enabled when callbacks are provided and history exists
+  const backEnabled = canGoBack && !!onBack;
+  const forwardEnabled = canGoForward && !!onForward;
 
   return (
     <div className="url-bar" data-mode={mode} data-loading={loading}>
-      {/* Navigation buttons - grayed out in observation mode */}
+      {/* Navigation buttons - enabled when history navigation is available */}
       <div className="url-bar-nav">
         <button
           className="url-bar-nav-button"
-          disabled={isObservationMode || !canGoBack}
+          disabled={!backEnabled}
+          onClick={backEnabled ? onBack : undefined}
           aria-label="Back"
-          title="Back (observation mode)"
+          title={backEnabled ? "Go back in history" : "No previous history"}
         >
           {Icons.back}
         </button>
         <button
           className="url-bar-nav-button"
-          disabled={isObservationMode || !canGoForward}
+          disabled={!forwardEnabled}
+          onClick={forwardEnabled ? onForward : undefined}
           aria-label="Forward"
-          title="Forward (observation mode)"
+          title={forwardEnabled ? "Go forward in history" : "At latest"}
         >
           {Icons.forward}
         </button>
         <button
           className="url-bar-nav-button"
-          disabled={isObservationMode}
+          disabled={true}
           aria-label={loading ? "Stop" : "Refresh"}
-          title={loading ? "Stop (observation mode)" : "Refresh (observation mode)"}
+          title={loading ? "Loading..." : "Refresh (observation mode)"}
         >
           {loading ? Icons.stop : Icons.refresh}
         </button>
