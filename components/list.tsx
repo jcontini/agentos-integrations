@@ -132,7 +132,7 @@ export function List(props: ListProps) {
     }
   }, [items, onDoubleClick]);
 
-  // Loading state
+  // Loading state - show Mac OS 9 style indeterminate progress bar
   if (loading) {
     return (
       <div 
@@ -142,7 +142,7 @@ export function List(props: ListProps) {
         aria-busy="true"
       >
         <div className="list-loading">
-          <span className="list-loading-spinner" aria-hidden="true" />
+          <div className="progress-bar" role="progressbar" aria-label="Loading..." />
           <span className="list-loading-text">Loading...</span>
         </div>
       </div>
