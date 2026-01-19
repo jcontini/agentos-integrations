@@ -83,9 +83,9 @@ export class MCPTestClient extends EventEmitter {
     }
 
     return new Promise((resolve, reject) => {
-      this.log('Spawning:', this.options.command, ['mcp-server']);
+      this.log('Spawning:', this.options.command, ['mcp']);
 
-      this.process = spawn(this.options.command, ['mcp-server'], {
+      this.process = spawn(this.options.command, ['mcp'], {
         env: { 
           ...process.env, 
           AGENTOS_ENV: 'test',

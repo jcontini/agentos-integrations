@@ -104,11 +104,32 @@
         },
         "relationships": {
           "type": "object",
-          "description": "Which graph relationships are supported for this entity",
+          "description": "Which graph relationships are supported for this entity. Supports shorthand ('full') or extended ({ support, mutation }) format.",
           "additionalProperties": {
-            "type": "string",
-            "enum": ["full", "read_only", "write_only", "none"],
-            "description": "Level of support: full (read+write), read_only, write_only, none"
+            "oneOf": [
+              {
+                "type": "string",
+                "enum": ["full", "read_only", "write_only", "none"],
+                "description": "Shorthand: just the support level"
+              },
+              {
+                "type": "object",
+                "description": "Extended: support level + optional mutation handler",
+                "required": ["support"],
+                "properties": {
+                  "support": {
+                    "type": "string",
+                    "enum": ["full", "read_only", "write_only", "none"],
+                    "description": "Level of support: full (read+write), read_only, write_only, none"
+                  },
+                  "mutation": {
+                    "type": "string",
+                    "description": "Utility to call when this relationship changes during updates (e.g., 'move_task')"
+                  }
+                },
+                "additionalProperties": false
+              }
+            ]
           }
         },
         "mapping": {

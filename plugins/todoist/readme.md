@@ -27,7 +27,9 @@ adapters:
   task:
     terminology: Task
     relationships:
-      task_project: full  # Adapter handles complexity (REST for read, Sync API for moves via move_task)
+      task_project:
+        support: full
+        mutation: move_task  # REST API can't change project — route through Sync API utility
       task_parent: full
       task_labels: full
     mapping:
@@ -119,7 +121,7 @@ operations:
         labels: "{{params.labels}}"
 
   task.update:
-    description: Update an existing task
+    description: Update an existing task (including moving to different project)
     returns: task
     params:
       id: { type: string, required: true, description: "Task ID" }
@@ -128,6 +130,7 @@ operations:
       due: { type: string, description: "New due date" }
       priority: { type: integer, description: "New priority" }
       labels: { type: array, description: "New labels" }
+      project_id: { type: string, description: "Move to different project" }
     rest:
       method: POST
       url: "https://api.todoist.com/rest/v2/tasks/{{params.id}}"
@@ -220,7 +223,7 @@ Personal task management integration.
 - Project and label support
 - Subtasks via parent_id
 - Rich filters: `today`, `overdue`, `7 days`, `no date`
-- Move tasks between projects (via Sync API utility)
+- Move tasks between projects (handled transparently via `task.update`)
 
 ## Priority Mapping
 
@@ -228,7 +231,8 @@ Todoist uses inverted priorities (4=urgent, 1=normal). AgentOS normalizes this:
 - Our priority 1 = Todoist priority 4 (urgent/red)
 - Our priority 4 = Todoist priority 1 (normal)
 
-## Limitations
+## Technical Notes
 
-- Moving tasks between projects requires the `move_task` utility (Sync API)
+- Moving tasks uses Todoist's Sync API (REST API doesn't support this)
+- AgentOS handles this transparently — just include `project_id` in `task.update`
 - Recurring task due dates must preserve the recurrence pattern

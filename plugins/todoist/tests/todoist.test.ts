@@ -202,6 +202,72 @@ describe('Todoist Plugin', () => {
     });
   });
 
+  describe('task.update with project_id (mutation handler)', () => {
+    let taskToMove: any;
+    let targetProject: any;
+
+    it('can move task to different project via task.update', async () => {
+      if (skipTests) {
+        console.log('  Skipping: no credentials');
+        return;
+      }
+
+      // Get projects to find a target
+      const projects = await aos().call('UsePlugin', {
+        plugin,
+        tool: 'project.list',
+      });
+
+      if (projects.length < 2) {
+        console.log('  Skipping: need at least 2 projects to test move');
+        return;
+      }
+
+      // Create task in first project
+      const title = testContent('task to move');
+      taskToMove = await aos().call('UsePlugin', {
+        plugin,
+        tool: 'task.create',
+        params: {
+          title,
+          project_id: projects[0].id,
+        },
+        execute: true,
+      });
+
+      expect(taskToMove).toBeDefined();
+      createdItems.push({ id: taskToMove.id });
+
+      // Find a different project to move to
+      targetProject = projects[1];
+
+      // Move task by calling task.update with project_id
+      // This should route through the move_task mutation handler
+      const result = await aos().call('UsePlugin', {
+        plugin,
+        tool: 'task.update',
+        params: {
+          id: taskToMove.id,
+          project_id: targetProject.id,
+        },
+        execute: true,
+      });
+
+      expect(result).toBeDefined();
+
+      // Verify the task is now in the new project
+      const movedTask = await aos().call('UsePlugin', {
+        plugin,
+        tool: 'task.get',
+        params: { id: taskToMove.id },
+      });
+
+      expect(movedTask._project_id).toBe(targetProject.id);
+    });
+
+    // Cleanup handled by afterAll
+  });
+
   describe('project.list', () => {
     it('returns an array of projects', async () => {
       if (skipTests) return;
