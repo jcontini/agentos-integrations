@@ -1,5 +1,13 @@
+/* Chicago - the classic Mac OS system font */
+@font-face {
+  font-family: "Chicago";
+  src: url(chicago.ttf) format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
 :root {
-  --preferred-font: "Charcoal";
+  --preferred-font: "Chicago", "Charcoal", Geneva, sans-serif;
   --desktop-bg: #9999CC;
   --window-bg: #DDDDDD;
   --window-fg: #000000;
@@ -16,6 +24,7 @@
 }
 
 body {
+  font-family: var(--preferred-font);
   color: var(--window-fg);
 }
 
@@ -2011,4 +2020,223 @@ progress:not([value])::-webkit-progress-value {
   font-size: 11px;
   font-weight: 500;
   color: #444;
+}
+
+/* =============================================================================
+   Menu Bar (Mac OS 9 Style)
+   The classic menu bar at the top of the screen
+   ============================================================================= */
+
+.menu-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 24px;
+  z-index: 100000;
+  
+  display: flex;
+  align-items: stretch;
+  
+  background: var(--window-frame-bg);
+  border-bottom: 1px solid #000;
+  box-shadow: 
+    inset 0 1px 0 #fff,
+    inset 0 -1px 0 #999;
+  
+  font-family: var(--preferred-font);
+  font-size: 12px;
+  font-weight: normal;
+  color: #000;
+  user-select: none;
+}
+
+/* Adjust desktop when menu bar is present */
+.desktop.has-menubar {
+  padding-top: 24px;
+}
+
+.desktop.has-menubar .desktop-icons {
+  top: 32px; /* 24px menu bar + 8px margin */
+}
+
+/* Left side: menus */
+.menu-bar-left {
+  display: flex;
+  align-items: stretch;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.menu-bar-left > li {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  cursor: default;
+}
+
+.menu-bar-left > li:hover,
+.menu-bar-left > li:focus,
+.menu-bar-left > li[aria-expanded="true"] {
+  background: var(--primary-2);
+  color: #fff;
+}
+
+.menu-bar-left > li:focus {
+  outline: none;
+}
+
+/* Apple menu */
+.apple-menu {
+  padding-left: 8px !important;
+  padding-right: 10px !important;
+}
+
+.apple-logo {
+  display: block;
+  width: 13px;
+  height: 16px;
+  background-image: url(apple-logo.png);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* Invert to white when menu is highlighted */
+.apple-menu:hover .apple-logo,
+.apple-menu:focus .apple-logo,
+.apple-menu[aria-expanded="true"] .apple-logo {
+  filter: brightness(0) invert(1);
+}
+
+/* Dropdown menus from menu bar */
+.menu-bar-left > li > ul[role="menu"] {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 180px;
+  margin: 0;
+  padding: 2px 0;
+  
+  background: var(--window-frame-bg);
+  border: 1px solid #000;
+  box-shadow: 
+    inset 1px 1px 0 #fff,
+    inset -1px -1px 0 #888,
+    2px 2px 4px rgba(0,0,0,0.3);
+  
+  list-style: none;
+  z-index: 100001;
+}
+
+.menu-bar-left > li > ul[role="menu"] li {
+  padding: 2px 20px 2px 22px;
+  cursor: default;
+  white-space: nowrap;
+}
+
+.menu-bar-left > li > ul[role="menu"] li:hover,
+.menu-bar-left > li > ul[role="menu"] li:focus {
+  background: var(--primary-2);
+  color: #fff;
+  outline: none;
+}
+
+.menu-bar-left > li > ul[role="menu"] li[aria-disabled] {
+  color: #888;
+}
+
+.menu-bar-left > li > ul[role="menu"] li[aria-disabled]:hover,
+.menu-bar-left > li > ul[role="menu"] li[aria-disabled]:focus {
+  background: transparent;
+  color: #888;
+}
+
+.menu-bar-left > li > ul[role="menu"] li[role="separator"] {
+  height: 0;
+  padding: 0;
+  margin: 4px 0;
+  border-top: 1px solid #888;
+  border-bottom: 1px solid #fff;
+}
+
+.menu-bar-left > li > ul[role="menu"] li[data-shortcut]::after {
+  float: right;
+  content: attr(data-shortcut);
+  margin-left: 20px;
+  color: inherit;
+  opacity: 0.8;
+}
+
+/* Center: Solid fill (same as window chrome) */
+.menu-bar-center {
+  flex: 1;
+  background: var(--window-frame-bg);
+}
+
+/* App name in menu bar - bold when focused */
+.app-menu .app-name {
+  font-weight: bold;
+}
+
+/* Right side: clock and AgentOS indicator */
+.menu-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0;
+}
+
+.menu-bar-clock {
+  padding: 0 10px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.menu-bar-divider {
+  width: 1px;
+  height: 16px;
+  background: linear-gradient(to bottom, #999, #fff);
+  margin: 0 1px;
+}
+
+.menu-bar-app-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  height: 100%;
+  cursor: default;
+}
+
+.menu-bar-status {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  border: 1px solid #000;
+  box-shadow: inset 1px 1px 0 rgba(255,255,255,0.4), inset -1px -1px 0 rgba(0,0,0,0.2);
+}
+
+.menu-bar-status[data-state="connected"] {
+  background: linear-gradient(135deg, #6699ff, #3366cc);
+}
+
+.menu-bar-status[data-state="connecting"] {
+  background: linear-gradient(135deg, #fcd34d, #f59e0b);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+.menu-bar-status[data-state="disconnected"] {
+  background: linear-gradient(135deg, #f87171, #ef4444);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.menu-bar-app-name {
+  font-size: 12px;
 }
