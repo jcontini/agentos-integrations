@@ -6,6 +6,11 @@ name: Settings
 icon: icon.svg
 description: Configure AgentOS preferences, plugins, and credentials
 
+# Route settings tool activities to this app
+# (settings is a tool, not a data entity - so we use routes, not entities)
+routes:
+  - settings
+
 # What this app manages (shown in MCP tool description)
 manages:
   - all plugins
