@@ -5,6 +5,7 @@ description: Semantic web search and content extraction
 icon: icon.png
 color: "#5436DA"
 tags: [web, search, scraping]
+display: browser
 
 website: https://exa.ai
 privacy_url: https://exa.ai/privacy
@@ -22,9 +23,11 @@ instructions: |
   - Fast: typically under 1 second per request
   - Use for research, concepts, "how to" queries
 
-# Action implementations (merged from mapping.yaml)
+# Action implementations
+# Each action declares which capability it provides and maps to the unified schema
 actions:
   search:
+    provides: web_search
     label: "Search web"
     rest:
       method: POST
@@ -36,15 +39,17 @@ actions:
       response:
         root: "results"
         mapping:
-          id: "[].id"
-          url: "[].url"
-          title: "[].title"
-          snippet: "[].text"
-          published_at: "[].publishedDate"
-          score: "[].score"
-          connector: "'exa'"
+          # web_search schema: { results: [{ url, title, snippet, published_at? }] }
+          results:
+            each: "[]"
+            map:
+              url: ".url"
+              title: ".title"
+              snippet: ".text"
+              published_at: ".publishedDate"
 
   read:
+    provides: web_read
     label: "Read URL"
     rest:
       method: POST
@@ -54,13 +59,12 @@ actions:
           - "{{params.url}}"
         text: true
       response:
-        root: "results"
+        root: "results[0]"
         mapping:
-          id: ".id"
+          # web_read schema: { url, title?, content }
           url: ".url"
           title: ".title"
           content: ".text"
-          connector: "'exa'"
 ---
 
 # Exa

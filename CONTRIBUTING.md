@@ -19,6 +19,7 @@ auth:
 
 actions:
   list:
+    provides: task_list           # Capability for UI routing
     description: List items
     readonly: true
     rest:
@@ -26,8 +27,12 @@ actions:
       url: "https://api.myservice.com/items"
       response:
         mapping:
-          id: "[].id"
-          name: "[].name"
+          # Must match capability schema (see tests/connector.schema.json)
+          tasks:
+            each: "[]"
+            map:
+              id: ".id"
+              title: ".name"
 ---
 
 # My Service
@@ -45,6 +50,37 @@ connectors/
     tests/          # Optional integration tests
       linear.test.ts
 ```
+
+## Capabilities
+
+Actions can declare a `provides:` field that maps to a **capability**. This tells the UI which App to use for rendering results.
+
+```yaml
+actions:
+  search:
+    provides: web_search    # → renders in Browser App
+    rest:
+      # ...
+  
+  list:
+    provides: task_list     # → renders in Tasks App
+    rest:
+      # ...
+```
+
+**Common capabilities:**
+
+| App | Capabilities |
+|-----|--------------|
+| Browser | `web_search`, `web_read` |
+| Tasks | `task_list`, `task_get`, `task_create`, `task_update`, `task_delete` |
+| Contacts | `contact_list`, `contact_get`, `contact_create`, ... |
+| Calendar | `event_list`, `event_get`, `event_create`, ... |
+| Books | `book_list`, `book_get` |
+
+**Source of truth:** See `tests/connector.schema.json` for the full enum of valid capabilities. The schema validates `provides` values — typos will fail CI.
+
+**Response mapping:** When you declare `provides: web_search`, your response mapping must output the schema that capability expects. See the app specs in the main repo (`.specs/apps/`) for schema definitions.
 
 ## Executors
 
@@ -205,10 +241,21 @@ npm test connectors/myservice     # Single connector
 | `pre-commit` | Schema validation, security checks | ~1s |
 | `pre-push` | Full integration tests for changed files | varies |
 
-## Reference Connectors
+## Reference
+
+### Schema (Source of Truth)
+
+**`tests/connector.schema.json`** — JSON Schema that validates all connector configs. Contains:
+- All valid `provides:` capability values (enum)
+- Required fields and types
+- Auth configuration options
+- Executor definitions
+
+### Example Connectors
 
 | Pattern | Example |
 |---------|---------|
+| REST + capabilities | `connectors/exa/readme.md` |
 | REST API | `connectors/demo/readme.md` |
 | GraphQL API | `connectors/linear/readme.md` |
 | Local SQLite | `connectors/imessage/readme.md` |
@@ -221,6 +268,8 @@ Before submitting:
 
 - [ ] `id` is lowercase with hyphens (`my-service`)
 - [ ] `tags` includes at least one category
+- [ ] `provides:` set on actions (see `tests/connector.schema.json` for valid values)
+- [ ] Response mapping matches capability schema
 - [ ] `readonly: true` on read-only actions
 - [ ] Icon is square PNG or SVG
 - [ ] No credentials in config

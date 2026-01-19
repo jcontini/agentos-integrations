@@ -60,14 +60,6 @@
         }
       ]
     },
-    "provides": {
-      "type": "array",
-      "description": "Capabilities this connector provides",
-      "items": {
-        "type": "string",
-        "enum": ["search", "filesystem", "database", "browser"]
-      }
-    },
     "actions": {
       "type": "object",
       "description": "Action implementations",
@@ -149,6 +141,56 @@
       "type": "object",
       "description": "Single action implementation",
       "properties": {
+        "provides": {
+          "type": "string",
+          "description": "Capability this action provides (maps to an App for UI rendering)",
+          "enum": [
+            "web_search",
+            "web_read",
+            "task_list",
+            "task_get",
+            "task_create",
+            "task_update",
+            "task_delete",
+            "contact_list",
+            "contact_get",
+            "contact_create",
+            "contact_update",
+            "contact_delete",
+            "event_list",
+            "event_get",
+            "event_create",
+            "event_update",
+            "event_delete",
+            "book_list",
+            "book_get",
+            "message_list",
+            "message_get",
+            "message_send",
+            "thread_list",
+            "thread_get",
+            "thread_reply",
+            "email_list",
+            "email_get",
+            "email_send",
+            "email_delete",
+            "photo_list",
+            "photo_get",
+            "file_list",
+            "file_get",
+            "file_create",
+            "file_delete",
+            "flight_list",
+            "flight_get",
+            "product_list",
+            "product_get",
+            "product_search",
+            "media_list",
+            "media_get",
+            "media_play",
+            "media_pause"
+          ]
+        },
         "label": {
           "type": "string",
           "description": "Human-readable action label"

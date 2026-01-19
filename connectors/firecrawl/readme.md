@@ -5,6 +5,7 @@ description: Web scraping with browser rendering for JS-heavy sites
 icon: icon.png
 color: "#FF6B35"
 tags: [web, search, scraping]
+display: browser
 
 website: https://firecrawl.dev
 privacy_url: https://www.firecrawl.dev/privacy
@@ -24,9 +25,11 @@ instructions: |
   - Slower than Exa but handles modern web apps
   - Cost: ~$0.009/page for scrape, ~$0.01/search
 
-# Action implementations (merged from mapping.yaml)
+# Action implementations
+# Each action declares which capability it provides and maps to the unified schema
 actions:
   search:
+    provides: web_search
     label: "Search web"
     rest:
       method: POST
@@ -37,13 +40,16 @@ actions:
       response:
         root: "data"
         mapping:
-          id: "[].url"
-          url: "[].url"
-          title: "[].title"
-          snippet: "[].description"
-          connector: "'firecrawl'"
+          # web_search schema: { results: [{ url, title, snippet }] }
+          results:
+            each: "[]"
+            map:
+              url: ".url"
+              title: ".title"
+              snippet: ".description"
 
   read:
+    provides: web_read
     label: "Read URL"
     rest:
       method: POST
@@ -56,11 +62,10 @@ actions:
       response:
         root: "data"
         mapping:
-          id: ".metadata.sourceURL"
+          # web_read schema: { url, title?, content }
           url: ".metadata.sourceURL"
           title: ".metadata.title"
           content: ".markdown"
-          connector: "'firecrawl'"
 ---
 
 # Firecrawl
