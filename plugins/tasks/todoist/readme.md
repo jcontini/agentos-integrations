@@ -75,7 +75,20 @@ adapters:
 
 operations:
   task.list:
-    description: List tasks with optional filters
+    description: List actionable tasks (due today, overdue, or in inbox)
+    returns: task[]
+    params:
+      query: { type: string, default: "today | overdue | #Inbox", description: "Todoist filter query" }
+    rest:
+      method: GET
+      url: https://api.todoist.com/api/v1/tasks/filter
+      query:
+        query: "{{params.query}}"
+      response:
+        root: /results
+
+  task.list_all:
+    description: List all tasks with optional filters (no smart defaults)
     returns: task[]
     params:
       project_id: { type: string, description: "Filter by project ID" }
@@ -243,8 +256,10 @@ Personal task management integration using [Todoist API v1](https://developer.to
 - Full CRUD for tasks
 - Project and label support
 - Subtasks via parent_id
-- Rich filters via `task.filter`: `today`, `overdue`, `7 days`, `no date`
+- **Smart defaults**: `task.list` returns actionable tasks (today, overdue, inbox)
+- Rich filters via `query` param: `today`, `overdue`, `7 days`, `#ProjectName`, `@label`
 - Move tasks between projects, sections, or parents
+- `task.list_all` for raw list when you need everything
 
 ## Priority Scale
 
