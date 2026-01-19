@@ -2921,17 +2921,52 @@ progress:not([value])::-webkit-progress-value {
   margin: 0;
   font-size: 12px;
   color: #4a4;
-  text-align: center;
-  padding: 8px;
+  padding: 4px 0;
 }
 
+/* Compact error summary */
+.about-panel-errors-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.about-panel-errors-status {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.about-panel-last-error {
+  font-size: 12px;
+  color: #333;
+}
+
+.about-panel-error-count {
+  font-size: 11px;
+  color: #888;
+}
+
+.about-panel-view-logs {
+  font-size: 11px;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+
+/* Expanded error list */
 .about-panel-errors {
   list-style: none;
-  margin: 0;
-  padding: 0;
+  margin: 8px 0 0;
+  padding: 8px;
+  background: #f8f8f8;
+  border: 1px solid #ccc;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
 }
 
 .about-panel-error-item {
@@ -2954,6 +2989,7 @@ progress:not([value])::-webkit-progress-value {
 
 .about-panel-error-context {
   font-family: "Monaco", "Menlo", monospace;
+  font-size: 10px;
   color: #555;
 }
 

@@ -117,11 +117,25 @@ export function AboutPanel({ className = '' }: AboutPanelProps) {
   const [errors, setErrors] = useState<RecentError[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [showLogs, setShowLogs] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     
-    Promise.all([fetchStatus(), fetchRecentErrors()])
+    // Fetch status and errors with a timeout to prevent hanging
+    const timeoutMs = 5000;
+    
+    const fetchWithTimeout = async <T,>(promise: Promise<T>): Promise<T> => {
+      const timeout = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout')), timeoutMs)
+      );
+      return Promise.race([promise, timeout]);
+    };
+    
+    Promise.all([
+      fetchWithTimeout(fetchStatus()),
+      fetchWithTimeout(fetchRecentErrors())
+    ])
       .then(([statusData, errorsData]) => {
         if (!cancelled) {
           setStatus(statusData);
@@ -219,12 +233,34 @@ export function AboutPanel({ className = '' }: AboutPanelProps) {
         </dl>
       </fieldset>
 
-      {/* Recent Errors */}
+      {/* Recent Errors - compact summary with expandable logs */}
       <fieldset className="about-panel-section">
         <legend>Recent Errors</legend>
         {errors.length === 0 ? (
           <p className="about-panel-no-errors">No recent errors</p>
         ) : (
+          <div className="about-panel-errors-summary">
+            <div className="about-panel-errors-status">
+              <span className="about-panel-last-error">
+                Last error: {formatRelativeTime(errors[0].created_at)}
+              </span>
+              <span className="about-panel-error-count">
+                ({errors.length} total)
+              </span>
+            </div>
+            <button 
+              type="button"
+              className="about-panel-view-logs"
+              onClick={() => setShowLogs(!showLogs)}
+              aria-expanded={showLogs}
+            >
+              {showLogs ? 'Hide Logs' : 'View Logs'}
+            </button>
+          </div>
+        )}
+        
+        {/* Expandable error list */}
+        {showLogs && errors.length > 0 && (
           <ul className="about-panel-errors">
             {errors.map((err, i) => (
               <li key={i} className="about-panel-error-item">
