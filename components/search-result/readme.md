@@ -11,19 +11,18 @@ props:
 root:
   type: container
   direction: column
-  padding: small
+  padding: medium
   border: true
   gap: tiny
   children:
     - type: text
       value: "{{props.title}}"
-      style: bold
+      style: [bold, large]
     - type: text
       value: "{{props.url}}"
-      style: [small, muted, monospace]
+      style: [muted, small]
     - type: text
       value: "{{props.snippet}}"
-      style: small
       if: "{{props.snippet}}"
 ---
 

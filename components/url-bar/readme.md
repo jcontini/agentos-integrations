@@ -1,25 +1,33 @@
 ---
 id: url-bar
 name: URL Bar
-description: Location bar with icon and readonly URL/query display
+description: Location bar with icon, connector info, and readonly URL/query display
 
 props:
   value: string
   icon: string?
+  connector: string?
 
 root:
   type: container
   direction: row
-  padding: small
-  background: muted
-  gap: small
+  padding: medium
+  gap: medium
   children:
+    # Search/browse icon
     - type: icon
       name: "{{props.icon | default: 'globe'}}"
-    - type: text
-      value: "{{props.value}}"
-      style: monospace
-      truncate: true
+      size: 24
+    
+    # Input-style container for the query/URL - full width
+    - type: container
+      direction: row
+      padding: small
+      border: true
+      grow: true
+      children:
+        - type: text
+          value: "{{props.value}}"
 ---
 
 # URL Bar

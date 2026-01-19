@@ -12,17 +12,19 @@ views:
       type: container
       direction: column
       children:
-        # URL bar showing the search query
+        # Location bar with connector info and search query
         - component: url-bar
           value: "{{request.query}}"
           icon: search
+          connector: "{{response[0].connector}}"
         
-        # Search results list
+        # Search results list (response is a flat array)
         - type: container
           direction: column
-          gap: small
+          gap: tiny
+          padding: small
           scroll: true
-          repeat: "{{response.results}}"
+          repeat: "{{response}}"
           item:
             component: search-result
             title: "{{item.title}}"
@@ -35,7 +37,7 @@ views:
       type: container
       direction: column
       children:
-        # URL bar showing the page URL
+        # Location bar showing the page URL
         - component: url-bar
           value: "{{response.url}}"
           icon: globe
