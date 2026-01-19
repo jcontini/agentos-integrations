@@ -3,7 +3,7 @@
 # - Security checks (catches credential exposure)
 # Full integration tests run on pre-push
 
-STAGED_READMES=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^connectors/[^/]+/readme\.md$' || true)
+STAGED_READMES=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^plugins/[^/]+/readme\.md$' || true)
 
 if [ -z "$STAGED_READMES" ]; then
   exit 0
@@ -13,7 +13,7 @@ ERRORS=0
 
 # === Schema Validation ===
 echo "📋 Schema validation..."
-APPS=$(echo "$STAGED_READMES" | sed 's|connectors/||' | sed 's|/readme.md||' | tr '\n' ' ')
+APPS=$(echo "$STAGED_READMES" | sed 's|plugins/||' | sed 's|/readme.md||' | tr '\n' ' ')
 node tests/scripts/validate-schema.mjs $APPS || ERRORS=$((ERRORS + 1))
 
 # === Security Checks ===

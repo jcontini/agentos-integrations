@@ -1,11 +1,11 @@
 # Contributing to AgentOS
 
-This repo contains **connectors** — YAML configs that connect AgentOS to external services.
+This repo contains **plugins** — YAML configs that connect AgentOS to external services.
 
 ## Quick Start
 
 ```yaml
-# connectors/myservice/readme.md
+# plugins/myservice/readme.md
 ---
 id: myservice
 name: My Service
@@ -42,8 +42,8 @@ Human-readable documentation goes here.
 ## Folder Structure
 
 ```
-connectors/
-  linear/           # Each connector is a folder
+plugins/
+  linear/           # Each plugin is a folder
     readme.md       # YAML frontmatter + markdown docs
     icon.png        # Square icon (PNG or SVG)
     tests/          # Optional integration tests
@@ -77,7 +77,7 @@ actions:
 | Calendar | `event_list`, `event_get`, `event_create`, ... |
 | Books | `book_list`, `book_get` |
 
-**Source of truth:** See `tests/connector.schema.json` for the full enum of valid capabilities. The schema validates `provides` values — typos will fail CI.
+**Source of truth:** See `tests/plugin.schema.json` for the full enum of valid capabilities. The schema validates `provides` values — typos will fail CI.
 
 **Response mapping:** When you declare `provides: web_search`, your response mapping must output the schema that capability expects. See the app specs in the main repo (`.specs/apps/`) for schema definitions.
 
@@ -266,48 +266,135 @@ The pre-commit hook blocks:
 
 ## Testing
 
+### Test Standards
+
+**All plugin tests must follow these standards:**
+
+1. **Real APIs, real credentials** — Tests call actual APIs using your production credentials. No mocking.
+
+2. **Graceful credential handling** — Tests MUST skip gracefully if credentials aren't configured:
+   ```typescript
+   beforeAll(async () => {
+     try {
+       await aos().call('UsePlugin', { plugin, tool: 'list', params: { limit: 1 } });
+     } catch (e: any) {
+       if (e.message?.includes('Credential not found')) {
+         skipTests = true;  // Skip remaining tests
+       }
+     }
+   });
+   ```
+
+3. **Cleanup test data** — Any data created must be cleaned up in `afterAll()`:
+   ```typescript
+   afterAll(async () => {
+     for (const item of createdItems) {
+       await aos().call('UsePlugin', { plugin, tool: 'delete', params: { id: item.id }, execute: true });
+     }
+   });
+   ```
+
+4. **Test prefix** — Use `[TEST]` prefix via `testContent('name')` for easy identification.
+
+5. **Schema validation** — Verify responses have required fields (`id`, `title`, etc.).
+
+6. **Document limitations** — If an API doesn't support something (e.g., `limit` param), skip the test with a TODO comment.
+
 ### Automatic Capability Tests
 
-**Connectors that declare `provides:` are automatically tested against the capability schema.**
+**Plugins that declare `provides:` are automatically tested against the capability schema.**
 
 If your action has `provides: web_search`, the generic capability test will:
 1. Call your action with test params
 2. Validate the response matches the `web_search` schema
 3. Fail if fields are missing or wrong type
 
-This catches response mapping bugs without writing per-connector tests.
+This catches response mapping bugs without writing per-plugin tests.
 
 ```bash
-npm run test:capabilities    # Test all connectors with provides:
-npm run test:capabilities -- --connector=exa   # Single connector
+npm test                           # All tests
+TEST_PLUGIN=exa npm test           # Single plugin
 ```
 
 ### Custom Integration Tests
 
-For additional tests (CRUD flows, edge cases), add per-connector tests:
+For additional tests (CRUD flows, edge cases), add per-plugin tests:
 
 ```typescript
-// connectors/myservice/tests/myservice.test.ts
-import { describe, it, expect } from 'vitest';
+// plugins/myservice/tests/myservice.test.ts
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { aos, testContent, TEST_PREFIX } from '../../../tests/utils/fixtures';
 
-describe('My Service', () => {
+const plugin = 'myservice';
+const createdItems: Array<{ id: string }> = [];
+let skipTests = false;
+
+describe('My Service Plugin', () => {
+  beforeAll(async () => {
+    // Check credentials
+    try {
+      await aos().call('UsePlugin', { plugin, tool: 'list', params: { limit: 1 } });
+    } catch (e: any) {
+      if (e.message?.includes('Credential not found')) {
+        console.log('  ⏭ Skipping: no credentials configured');
+        skipTests = true;
+      } else throw e;
+    }
+  });
+
+  afterAll(async () => {
+    // Cleanup
+    for (const item of createdItems) {
+      try {
+        await aos().call('UsePlugin', { plugin, tool: 'delete', params: { id: item.id }, execute: true });
+      } catch (e) { /* ignore cleanup errors */ }
+    }
+  });
+
   it('can list items', async () => {
-    const result = await aos.call({
-      app: 'myservice',
-      action: 'list',
+    if (skipTests) return;
+    
+    const result = await aos().call('UsePlugin', {
+      plugin,
+      tool: 'list',
       params: { limit: 5 }
     });
+    
     expect(Array.isArray(result)).toBe(true);
+    for (const item of result) {
+      expect(item.id).toBeDefined();
+      expect(item.plugin).toBe(plugin);
+    }
+  });
+
+  it('can create and delete an item', async () => {
+    if (skipTests) return;
+    
+    const created = await aos().call('UsePlugin', {
+      plugin,
+      tool: 'create',
+      params: { title: testContent('test item') },
+      execute: true
+    });
+    
+    expect(created.id).toBeDefined();
+    createdItems.push({ id: created.id });
+    
+    // Delete immediately (or let afterAll handle it)
+    await aos().call('UsePlugin', {
+      plugin,
+      tool: 'delete', 
+      params: { id: created.id },
+      execute: true
+    });
+    createdItems.pop();
   });
 });
 ```
 
-**Test data:** Use `[TEST]` prefix via `testContent('name')` for cleanup.
-
 ```bash
-npm test                    # All tests
-npm test connectors/myservice     # Single connector
+npm test                         # All tests
+npm test plugins/myservice       # Single plugin
 ```
 
 ## Git Hooks
@@ -321,22 +408,22 @@ npm test connectors/myservice     # Single connector
 
 ### Schema (Source of Truth)
 
-**`tests/connector.schema.json`** — JSON Schema that validates all connector configs. Contains:
+**`tests/plugin.schema.json`** — JSON Schema that validates all plugin configs. Contains:
 - All valid `provides:` capability values (enum)
 - Required fields and types
 - Auth configuration options
 - Executor definitions
 
-### Example Connectors
+### Example Plugins
 
 | Pattern | Example |
 |---------|---------|
-| REST + capabilities | `connectors/exa/readme.md` |
-| REST API | `connectors/demo/readme.md` |
-| GraphQL API | `connectors/linear/readme.md` |
-| Local SQLite | `connectors/imessage/readme.md` |
-| macOS Swift | `connectors/apple-calendar/readme.md` |
-| Cookie auth | `connectors/instagram/readme.md` |
+| REST + capabilities | `plugins/exa/readme.md` |
+| REST API | `plugins/demo/readme.md` |
+| GraphQL API | `plugins/linear/readme.md` |
+| Local SQLite | `plugins/imessage/readme.md` |
+| macOS Swift | `plugins/apple-calendar/readme.md` |
+| Cookie auth | `plugins/instagram/readme.md` |
 
 ## Checklist
 

@@ -1,22 +1,21 @@
 /**
- * Apple Contacts Connector Tests
+ * Apple Contacts Plugin Tests
  * 
- * Connector-specific tests for Apple Contacts.
- * Apple Contacts connector tests
+ * Plugin-specific tests for Apple Contacts.
  */
 
 import { describe, it, expect, beforeAll } from 'vitest';
 import { aos } from '../../../tests/utils/fixtures';
 
-const connector = 'apple-contacts';
+const plugin = 'apple-contacts';
 
-describe('Apple Contacts Connector', () => {
+describe('Apple Contacts Plugin', () => {
   let defaultAccountId: string;
 
   beforeAll(async () => {
-    const accounts = await aos().call('Connect', {
-      connector,
-      action: 'accounts'
+    const accounts = await aos().call('UsePlugin', {
+      plugin,
+      tool: 'accounts'
     });
     const defaultAccount = accounts.find((a: any) => a.is_default);
     if (!defaultAccount) {
@@ -28,9 +27,9 @@ describe('Apple Contacts Connector', () => {
   describe('List Fields', () => {
     it('returns phones, emails, urls in list response', async () => {
       // List should include these fields (added in Jan 2026)
-      const contacts = await aos().call('Connect', {
-        connector,
-        action: 'list',
+      const contacts = await aos().call('UsePlugin', {
+        plugin,
+        tool: 'list',
         params: { account: defaultAccountId, limit: 10 }
       });
 
@@ -49,9 +48,9 @@ describe('Apple Contacts Connector', () => {
 
     it('returns comma-separated values for multi-value fields', async () => {
       // Find a contact with multiple emails or phones
-      const contacts = await aos().call('Connect', {
-        connector,
-        action: 'list',
+      const contacts = await aos().call('UsePlugin', {
+        plugin,
+        tool: 'list',
         params: { account: defaultAccountId, limit: 50 }
       });
 

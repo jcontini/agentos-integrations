@@ -1,5 +1,5 @@
 /**
- * Goodreads Connector Tests
+ * Goodreads Plugin Tests
  * 
  * Tests CSV parsing and field mapping.
  */
@@ -10,14 +10,14 @@ import { join } from 'path';
 
 const fixturesDir = join(__dirname, 'fixtures');
 
-describe('Goodreads Connector', () => {
+describe('Goodreads Plugin', () => {
   describe('CSV Import', () => {
     it('parses CSV and returns records', async () => {
       const csvPath = join(fixturesDir, 'sample.csv');
       
-      const result = await aos().call('Connect', {
-        connector: 'goodreads',
-        action: 'pull',
+      const result = await aos().call('UsePlugin', {
+        plugin: 'goodreads',
+        tool: 'pull',
         params: { path: csvPath },
         execute: true
       });
@@ -29,9 +29,9 @@ describe('Goodreads Connector', () => {
     it('maps title correctly', async () => {
       const csvPath = join(fixturesDir, 'sample.csv');
       
-      const result = await aos().call('Connect', {
-        connector: 'goodreads',
-        action: 'pull',
+      const result = await aos().call('UsePlugin', {
+        plugin: 'goodreads',
+        tool: 'pull',
         params: { path: csvPath },
         execute: true
       });
@@ -46,9 +46,9 @@ describe('Goodreads Connector', () => {
     it('maps status from Exclusive Shelf', async () => {
       const csvPath = join(fixturesDir, 'sample.csv');
       
-      const result = await aos().call('Connect', {
-        connector: 'goodreads',
-        action: 'pull',
+      const result = await aos().call('UsePlugin', {
+        plugin: 'goodreads',
+        tool: 'pull',
         params: { path: csvPath },
         execute: true
       });
@@ -67,9 +67,9 @@ describe('Goodreads Connector', () => {
     it('strips ISBN wrapper quotes', async () => {
       const csvPath = join(fixturesDir, 'sample.csv');
       
-      const result = await aos().call('Connect', {
-        connector: 'goodreads',
-        action: 'pull',
+      const result = await aos().call('UsePlugin', {
+        plugin: 'goodreads',
+        tool: 'pull',
         params: { path: csvPath },
         execute: true
       });
@@ -86,9 +86,9 @@ describe('Goodreads Connector', () => {
     it('maps rating (0 becomes null or 0)', async () => {
       const csvPath = join(fixturesDir, 'sample.csv');
       
-      const result = await aos().call('Connect', {
-        connector: 'goodreads',
-        action: 'pull',
+      const result = await aos().call('UsePlugin', {
+        plugin: 'goodreads',
+        tool: 'pull',
         params: { path: csvPath },
         execute: true
       });

@@ -40,15 +40,15 @@ if [ -z "$CHANGED_FILES" ]; then
   exit 0
 fi
 
-# Extract unique connectors from changed files (connectors/{connector}/...)
-AFFECTED_APPS=$(echo "$CHANGED_FILES" | grep -oE '^connectors/[^/]+' | sort -u | cut -d/ -f2 || true)
+# Extract unique plugins from changed files (plugins/{plugin}/...)
+AFFECTED_APPS=$(echo "$CHANGED_FILES" | grep -oE '^plugins/[^/]+' | sort -u | cut -d/ -f2 || true)
 
 if [ -z "$AFFECTED_APPS" ]; then
-  echo "✅ No app files changed"
+  echo "✅ No plugin files changed"
   exit 0
 fi
 
-echo "📦 Testing apps: $AFFECTED_APPS"
+echo "📦 Testing plugins: $AFFECTED_APPS"
 echo ""
 
 # First, run schema validation
@@ -59,22 +59,22 @@ echo ""
 TESTED=0
 SKIPPED=0
 
-# Run tests for each affected app that has tests
+# Run tests for each affected plugin that has tests
 for app in $AFFECTED_APPS; do
-  APP_TEST_DIR="connectors/$app/tests"
+  APP_TEST_DIR="plugins/$app/tests"
   
   if [ -d "$APP_TEST_DIR" ]; then
     TEST_COUNT=$(find "$APP_TEST_DIR" -name "*.test.ts" 2>/dev/null | wc -l | tr -d ' ')
     if [ "$TEST_COUNT" -gt 0 ]; then
-      echo "🧪 Testing connectors/$app..."
+      echo "🧪 Testing plugins/$app..."
       npm test -- "$APP_TEST_DIR" --run || exit 1
       TESTED=$((TESTED + 1))
     else
-      echo "⏭️  connectors/$app: no test files"
+      echo "⏭️  plugins/$app: no test files"
       SKIPPED=$((SKIPPED + 1))
     fi
   else
-    echo "⏭️  connectors/$app: no tests/ directory"
+    echo "⏭️  plugins/$app: no tests/ directory"
     SKIPPED=$((SKIPPED + 1))
   fi
 done

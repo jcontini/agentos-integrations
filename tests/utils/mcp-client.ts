@@ -274,11 +274,9 @@ export class AgentOS {
     return this.mcp.call(tool, args);
   }
 
-  // Convenience methods for common apps
-
-  // Convenience methods - now use Connect tool with connector param
-  connect(connector: string, action: string, params?: object, execute?: boolean) {
-    return this.call('Connect', { connector, action, params, execute });
+  // Convenience method for UsePlugin
+  usePlugin(plugin: string, tool: string, params?: object, execute?: boolean) {
+    return this.call('UsePlugin', { plugin, tool, params, execute });
   }
 }
 

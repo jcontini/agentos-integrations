@@ -2,9 +2,9 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    // Look for tests in connectors and tests directories
+    // Look for tests in plugins and tests directories
     include: [
-      'connectors/**/tests/**/*.test.ts',
+      'plugins/**/tests/**/*.test.ts',
       'tests/**/*.test.ts',
     ],
     

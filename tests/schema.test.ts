@@ -1,8 +1,8 @@
 /**
  * Schema Validation Tests
  * 
- * Validates that all connector readme.md files have valid YAML frontmatter
- * that conforms to the connector schema.
+ * Validates that all plugin readme.md files have valid YAML frontmatter
+ * that conforms to the plugin schema.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -13,8 +13,8 @@ import addFormats from 'ajv-formats';
 import { parse as parseYaml } from 'yaml';
 
 const INTEGRATIONS_ROOT = join(__dirname, '..');
-const APPS_DIR = join(INTEGRATIONS_ROOT, 'connectors');
-const SCHEMA_PATH = join(INTEGRATIONS_ROOT, 'tests', 'connector.schema.json');
+const PLUGINS_DIR = join(INTEGRATIONS_ROOT, 'plugins');
+const SCHEMA_PATH = join(INTEGRATIONS_ROOT, 'tests', 'plugin.schema.json');
 
 // Load and compile schema
 const schema = JSON.parse(readFileSync(SCHEMA_PATH, 'utf-8'));
@@ -22,8 +22,8 @@ const ajv = new Ajv({ allErrors: true, strict: false });
 addFormats(ajv);
 const validate = ajv.compile(schema);
 
-// Get all app directories (flat structure)
-const getApps = () => readdirSync(APPS_DIR, { withFileTypes: true })
+// Get all plugin directories (flat structure)
+const getPlugins = () => readdirSync(PLUGINS_DIR, { withFileTypes: true })
   .filter(d => d.isDirectory())
   .map(d => d.name);
 
@@ -36,19 +36,19 @@ function parseFrontmatter(content: string): Record<string, unknown> | null {
   return parseYaml(yaml);
 }
 
-describe('Connector Schema Validation', () => {
-  const apps = getApps();
+describe('Plugin Schema Validation', () => {
+  const plugins = getPlugins();
 
   it('schema file exists', () => {
     expect(existsSync(SCHEMA_PATH)).toBe(true);
   });
 
-  it('has connectors to validate', () => {
-    expect(apps.length).toBeGreaterThan(0);
+  it('has plugins to validate', () => {
+    expect(plugins.length).toBeGreaterThan(0);
   });
 
-  describe.each(apps)('connectors/%s', (app) => {
-    const readmePath = join(APPS_DIR, app, 'readme.md');
+  describe.each(plugins)('plugins/%s', (plugin) => {
+    const readmePath = join(PLUGINS_DIR, plugin, 'readme.md');
 
     it('has readme.md', () => {
       expect(existsSync(readmePath)).toBe(true);
@@ -60,7 +60,7 @@ describe('Connector Schema Validation', () => {
       expect(frontmatter).not.toBeNull();
     });
 
-    it('conforms to connector schema', () => {
+    it('conforms to plugin schema', () => {
       const content = readFileSync(readmePath, 'utf-8');
       const frontmatter = parseFrontmatter(content);
       if (!frontmatter) {
@@ -78,8 +78,8 @@ describe('Connector Schema Validation', () => {
     });
 
     it('has required icon file', () => {
-      const appDir = join(APPS_DIR, app);
-      const files = readdirSync(appDir);
+      const pluginDir = join(PLUGINS_DIR, plugin);
+      const files = readdirSync(pluginDir);
       const hasIcon = files.some(f => f.startsWith('icon.'));
       expect(hasIcon).toBe(true);
     });
@@ -87,22 +87,22 @@ describe('Connector Schema Validation', () => {
 });
 
 describe('Schema Completeness', () => {
-  it('all connectors have tags', () => {
-    for (const app of getApps()) {
-      const content = readFileSync(join(APPS_DIR, app, 'readme.md'), 'utf-8');
+  it('all plugins have tags', () => {
+    for (const plugin of getPlugins()) {
+      const content = readFileSync(join(PLUGINS_DIR, plugin, 'readme.md'), 'utf-8');
       const frontmatter = parseFrontmatter(content);
-      expect(frontmatter?.tags, `${app} missing tags`).toBeDefined();
-      expect(Array.isArray(frontmatter?.tags), `${app} tags should be array`).toBe(true);
+      expect(frontmatter?.tags, `${plugin} missing tags`).toBeDefined();
+      expect(Array.isArray(frontmatter?.tags), `${plugin} tags should be array`).toBe(true);
     }
   });
 
-  it('all connectors have at least one action', () => {
-    for (const app of getApps()) {
-      const content = readFileSync(join(APPS_DIR, app, 'readme.md'), 'utf-8');
+  it('all plugins have at least one action', () => {
+    for (const plugin of getPlugins()) {
+      const content = readFileSync(join(PLUGINS_DIR, plugin, 'readme.md'), 'utf-8');
       const frontmatter = parseFrontmatter(content);
       const actions = frontmatter?.actions as Record<string, unknown> | undefined;
-      expect(actions, `${app} missing actions`).toBeDefined();
-      expect(Object.keys(actions || {}).length, `${app} has no actions`).toBeGreaterThan(0);
+      expect(actions, `${plugin} missing actions`).toBeDefined();
+      expect(Object.keys(actions || {}).length, `${plugin} has no actions`).toBeGreaterThan(0);
     }
   });
 });

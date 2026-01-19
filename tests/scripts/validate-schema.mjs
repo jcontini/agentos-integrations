@@ -16,8 +16,8 @@ import addFormats from 'ajv-formats';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '../..');  // tests/scripts/ -> root
-const APPS_DIR = join(ROOT, 'connectors');
-const SCHEMA_PATH = join(ROOT, 'tests', 'connector.schema.json');
+const APPS_DIR = join(ROOT, 'plugins');
+const SCHEMA_PATH = join(ROOT, 'tests', 'plugin.schema.json');
 
 // Load schema
 const schema = JSON.parse(readFileSync(SCHEMA_PATH, 'utf-8'));
@@ -50,7 +50,7 @@ for (const app of apps) {
   const readmePath = join(APPS_DIR, app, 'readme.md');
   
   if (!existsSync(readmePath)) {
-    console.error(`❌ connectors/${app}: readme.md not found`);
+    console.error(`❌ plugins/${app}: readme.md not found`);
     hasErrors = true;
     continue;
   }
@@ -59,20 +59,20 @@ for (const app of apps) {
   const frontmatter = parseFrontmatter(content);
 
   if (!frontmatter) {
-    console.error(`❌ connectors/${app}: No YAML frontmatter found`);
+    console.error(`❌ plugins/${app}: No YAML frontmatter found`);
     hasErrors = true;
     continue;
   }
 
   const valid = validate(frontmatter);
   if (!valid) {
-    console.error(`❌ connectors/${app}: Schema validation failed`);
+    console.error(`❌ plugins/${app}: Schema validation failed`);
     for (const err of validate.errors) {
       console.error(`   ${err.instancePath || '/'}: ${err.message}`);
     }
     hasErrors = true;
   } else {
-    console.log(`✓ connectors/${app}`);
+    console.log(`✓ plugins/${app}`);
   }
 }
 
@@ -80,6 +80,6 @@ if (hasErrors) {
   console.error('\n❌ Schema validation failed');
   process.exit(1);
 } else {
-  console.log('\n✅ All connectors valid');
+  console.log('\n✅ All plugins valid');
   process.exit(0);
 }

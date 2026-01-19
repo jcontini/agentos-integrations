@@ -86,3 +86,14 @@ Semantic web search and content extraction. Neural search finds content by meani
 - "How to" queries
 - Finding related content
 - Fast searches (default provider)
+
+## Known Limitations
+
+**`read` action**: May fail for URLs that Exa can't crawl (e.g., `example.com`, pages behind auth, rate-limited sites). The API returns empty results with error info in `statuses`, but the current plugin doesn't surface this gracefully. Use `firecrawl.read` as fallback for problematic URLs.
+
+The Exa API returns:
+```json
+{ "results": [], "statuses": [{ "id": "url", "status": "error", "error": { "tag": "CRAWL_NOT_FOUND" } }] }
+```
+
+TODO: Enhance executor to handle empty array access and surface `statuses` errors.

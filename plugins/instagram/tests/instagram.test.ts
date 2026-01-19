@@ -1,5 +1,5 @@
 /**
- * Instagram Connector Tests
+ * Instagram Plugin Tests
  * 
  * These tests require:
  * 1. Credential::Cookies type implemented in Rust
@@ -7,13 +7,13 @@
  * 3. Cookie auth injection working
  * 4. Real Instagram credentials
  * 
- * Run with: npm test -- connectors/instagram
+ * Run with: npm test -- plugins/instagram
  */
 
 import { describe, it, expect } from 'vitest';
 import { aos, testContent, TEST_PREFIX } from '../../../tests/utils/fixtures';
 
-describe('Instagram Connector', () => {
+describe('Instagram Plugin', () => {
   // These tests are skipped until the Playwright executor and cookie auth are implemented
   
   describe.skip('Authentication', () => {
@@ -31,63 +31,63 @@ describe('Instagram Connector', () => {
   });
 
   describe.skip('Read Operations', () => {
-    const connector = 'instagram';
-    const baseParams = { connector };
+    const plugin = 'instagram';
+    const baseParams = { plugin };
 
     it('should list conversations', async () => {
-      const result = await aos().call('Connect', {
+      const result = await aos().call('UsePlugin', {
         ...baseParams,
-        action: 'list_conversations'
+        tool: 'list_conversations'
       });
       expect(result).toBeDefined();
     });
 
     it('should get conversation by id', async () => {
       // Need a real thread_id
-      const result = await aos().call('Connect', {
+      const result = await aos().call('UsePlugin', {
         ...baseParams,
-        action: 'get_conversation',
+        tool: 'get_conversation',
         params: { conversation_id: 'test_thread_id' }
       });
       expect(result).toBeDefined();
     });
 
     it('should list messages in conversation', async () => {
-      const result = await aos().call('Connect', {
+      const result = await aos().call('UsePlugin', {
         ...baseParams,
-        action: 'list',
+        tool: 'list',
         params: { conversation_id: 'test_thread_id', limit: 20 }
       });
       expect(result).toBeDefined();
     });
 
     it('should search messages', async () => {
-      const result = await aos().call('Connect', {
+      const result = await aos().call('UsePlugin', {
         ...baseParams,
-        action: 'search',
+        tool: 'search',
         params: { query: 'hello' }
       });
       expect(result).toBeDefined();
     });
 
     it('should get unread messages', async () => {
-      const result = await aos().call('Connect', {
+      const result = await aos().call('UsePlugin', {
         ...baseParams,
-        action: 'get_unread'
+        tool: 'get_unread'
       });
       expect(result).toBeDefined();
     });
   });
 
   describe.skip('Write Operations', () => {
-    const connector = 'instagram';
-    const baseParams = { connector };
+    const plugin = 'instagram';
+    const baseParams = { plugin };
 
     it('should send a message', async () => {
       const content = testContent('test message');
-      const result = await aos().call('Connect', {
+      const result = await aos().call('UsePlugin', {
         ...baseParams,
-        action: 'send',
+        tool: 'send',
         params: { conversation_id: 'test_thread_id', content },
         execute: true
       });
@@ -95,9 +95,9 @@ describe('Instagram Connector', () => {
     });
 
     it('should react to a message', async () => {
-      const result = await aos().call('Connect', {
+      const result = await aos().call('UsePlugin', {
         ...baseParams,
-        action: 'react',
+        tool: 'react',
         params: {
           conversation_id: 'test_thread_id',
           message_id: 'test_item_id',
@@ -109,9 +109,9 @@ describe('Instagram Connector', () => {
     });
 
     it('should mark message as read', async () => {
-      const result = await aos().call('Connect', {
+      const result = await aos().call('UsePlugin', {
         ...baseParams,
-        action: 'mark_read',
+        tool: 'mark_read',
         params: {
           conversation_id: 'test_thread_id',
           message_id: 'test_item_id'
@@ -124,17 +124,17 @@ describe('Instagram Connector', () => {
     it('should delete a message', async () => {
       // First send a test message
       const content = testContent('to delete');
-      const sendResult = await aos().call('Connect', {
+      const sendResult = await aos().call('UsePlugin', {
         ...baseParams,
-        action: 'send',
+        tool: 'send',
         params: { conversation_id: 'test_thread_id', content },
         execute: true
       });
 
       // Then delete it
-      const result = await aos().call('Connect', {
+      const result = await aos().call('UsePlugin', {
         ...baseParams,
-        action: 'delete',
+        tool: 'delete',
         params: {
           conversation_id: 'test_thread_id',
           message_id: sendResult.id
@@ -146,13 +146,13 @@ describe('Instagram Connector', () => {
   });
 
   describe.skip('Presence', () => {
-    const connector = 'instagram';
-    const baseParams = { connector };
+    const plugin = 'instagram';
+    const baseParams = { plugin };
 
     it('should get presence status', async () => {
-      const result = await aos().call('Connect', {
+      const result = await aos().call('UsePlugin', {
         ...baseParams,
-        action: 'get_presence',
+        tool: 'get_presence',
         params: { user_ids: ['test_user_id'] }
       });
       expect(result).toBeDefined();
