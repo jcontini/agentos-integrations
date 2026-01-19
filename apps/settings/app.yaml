@@ -56,8 +56,8 @@ views:
               label: Privacy
             - id: plugins
               label: Plugins
-            - id: handlers
-              label: Handlers
+            - id: defaults
+              label: Defaults
             - id: accounts
               label: Accounts
             - id: about
@@ -72,10 +72,6 @@ views:
                 props:
                   gap: 16
                 children:
-                  - component: text
-                    props:
-                      content: Wallpaper
-                      variant: title
                   - component: wallpaper-picker
 
           features:
@@ -107,19 +103,16 @@ views:
                 props:
                   gap: 16
                 children:
-                  - component: text
-                    props:
-                      content: Installed Plugins
-                      variant: title
                   - component: plugin-list
 
-          handlers:
+          defaults:
             component: layout/scroll-area
             children:
               - component: layout/stack
                 props:
                   gap: 16
                 children:
+                  - component: web-defaults
                   - component: settings-panel
                     props:
                       category: handlers
@@ -131,10 +124,6 @@ views:
                 props:
                   gap: 16
                 children:
-                  - component: text
-                    props:
-                      content: Configured Accounts
-                      variant: title
                   - component: credential-list
 
           about:

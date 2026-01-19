@@ -3148,4 +3148,36 @@ progress:not([value])::-webkit-progress-value {
   padding: 2px 6px;
   border-radius: 3px;
   border: 1px solid #ccc;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  user-select: none;
+}
+
+/* Drag handle for sortable items */
+.setting-handler-pattern .drag-handle {
+  color: #888;
+  cursor: grab;
+  font-size: 8px;
+  letter-spacing: -1px;
+  margin-right: 2px;
+}
+
+.setting-handler-pattern .drag-handle:active {
+  cursor: grabbing;
+}
+
+/* Rank number for ordered items */
+.setting-handler-pattern .plugin-rank {
+  color: #666;
+  font-weight: 500;
+}
+
+/* Drag states */
+.setting-handler-pattern.dragging {
+  opacity: 0.5;
+}
+
+.setting-handler-pattern.drag-over {
+  box-shadow: -2px 0 0 var(--primary-3);
 }
