@@ -4,7 +4,7 @@
   "title": "AgentOS Plugin",
   "description": "Schema for AgentOS plugin readme.md frontmatter",
   "type": "object",
-  "required": ["id", "name", "description", "tags", "adapters", "operations"],
+  "required": ["id", "name", "description", "tags"],
   "properties": {
     "id": {
       "type": "string",

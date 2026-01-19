@@ -5,12 +5,8 @@ description: Demos using free public APIs - no API keys needed!
 icon: icon.svg
 tags: [demo, examples]
 
-# Empty adapters/operations — demo is utility-only
-adapters: {}
-operations: {}
-
 # ═══════════════════════════════════════════════════════════════════════════════
-# UTILITIES
+# UTILITIES (no adapters/operations — demo is utility-only)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 utilities:
