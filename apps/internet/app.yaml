@@ -109,6 +109,47 @@ views:
           source: "{{activity.connector}}"
           duration: "{{activity.duration_ms}}"
 
+  # Transcript view - shows video.transcript activities
+  # Uses same media-header as video view, with transcript text below
+  transcript:
+    entity: video
+    operation: transcript
+    title: "{{activity.response.title}}"
+    toolbar:
+      - component: url-bar
+        props:
+          mode: url
+          value: "{{activity.request.params.url}}"
+          source: "{{activity.connector}}"
+          sourceIcon: "/plugins/{{activity.connector}}/icon.png"
+    
+    layout:
+      - component: layout/scroll-area
+        children:
+          - component: layout/stack
+            props:
+              direction: vertical
+              gap: "16px"
+            children:
+              - component: media-header
+                props:
+                  thumbnail: "{{activity.response.thumbnail}}"
+                  title: "{{activity.response.title}}"
+                  creator: "{{activity.response.creator_name}}"
+                  creatorUrl: "{{activity.response.creator_url}}"
+                  duration: "{{activity.response.duration_ms}}"
+              - component: text
+                props:
+                  content: "Transcript"
+                  variant: caption
+              - component: text
+                props:
+                  content: "{{activity.response.description}}"
+                  variant: body
+        footer:
+          source: "{{activity.connector}}"
+          duration: "{{activity.duration_ms}}"
+
   # About view - shows app info
   about:
     title: About Internet

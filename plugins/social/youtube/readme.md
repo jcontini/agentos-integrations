@@ -58,6 +58,60 @@ operations:
         - "--skip-download"
         - "{{params.url}}"
       timeout: 30
+
+  video.transcript:
+    description: Get video transcript from auto-generated captions
+    returns: video
+    params:
+      url:
+        type: string
+        required: true
+        description: YouTube video URL
+      lang:
+        type: string
+        default: en
+        description: Language code (e.g., en, es, fr)
+    command:
+      binary: bash
+      args:
+        - "-c"
+        - |
+          set -e
+          TMPDIR=$(mktemp -d)
+          trap "rm -rf $TMPDIR" EXIT
+          
+          # Download auto-generated subtitles
+          yt-dlp --skip-download --write-auto-subs --sub-langs "{{params.lang}}" --convert-subs srt -o "$TMPDIR/sub_%(id)s" "{{params.url}}" >/dev/null 2>&1
+          
+          # Find the subtitle file
+          SRTFILE=$(ls "$TMPDIR"/sub_*.srt 2>/dev/null | head -1)
+          
+          if [ -z "$SRTFILE" ]; then
+            echo '{"error": "No auto-generated captions available for this video"}'
+            exit 0
+          fi
+          
+          # Extract clean text: remove timestamps, line numbers, empty lines, dedupe
+          TRANSCRIPT=$(cat "$SRTFILE" | grep -v '^[0-9]*$' | grep -v '^[0-9][0-9]:[0-9][0-9]:[0-9][0-9]' | grep -v '^$' | awk '!seen[$0]++' | tr '\n' ' ' | sed 's/  */ /g' | sed 's/"/\\"/g')
+          
+          # Get full video metadata (same fields as video.get)
+          METADATA=$(yt-dlp --dump-json --skip-download "{{params.url}}" 2>/dev/null)
+          
+          # Output JSON with all video fields plus transcript
+          # The adapter will map these to video entity properties
+          echo "$METADATA" | jq --arg transcript "$TRANSCRIPT" '{
+            title: .title,
+            description: $transcript,
+            duration: .duration,
+            thumbnail: .thumbnail,
+            channel: .channel,
+            channel_url: .channel_url,
+            id: .id,
+            webpage_url: .webpage_url,
+            upload_date: .upload_date,
+            resolution: .resolution
+          }'
+      timeout: 60
 ---
 
 # YouTube
@@ -79,6 +133,7 @@ choco install yt-dlp   # Windows
 | Operation | Description |
 |-----------|-------------|
 | `video.get` | Get video metadata (title, creator, thumbnail, duration) |
+| `video.transcript` | Get video transcript from auto-generated captions |
 
 ## URL Formats
 
