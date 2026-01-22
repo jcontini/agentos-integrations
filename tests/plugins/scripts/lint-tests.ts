@@ -18,7 +18,7 @@ import { fileURLToPath } from 'url';
 import { parse as parseYaml } from 'yaml';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const ROOT = join(__dirname, '../..');
+const ROOT = join(__dirname, '../../..');
 const PLUGINS_DIR = join(ROOT, 'plugins');
 
 // =============================================================================
@@ -123,23 +123,24 @@ function parsePluginYaml(pluginDir: string): PluginMeta | null {
   const yaml = parseFrontmatter(content);
   if (!yaml) return null;
   
-  // Extract operations from actions
-  const operations: string[] = [];
-  let firstReadAction: string | null = null;
+  // Extract operations from operations block
+  const operationNames: string[] = [];
+  let firstReadOperation: string | null = null;
   
-  for (const [actionName, action] of Object.entries(yaml.actions || {})) {
-    // Handle chained actions (arrays) and single actions
-    const op = Array.isArray(action) 
-      ? (action[0] as any)?.operation 
-      : (action as any)?.operation;
-    
-    if (op) {
-      operations.push(op);
-      if (op === 'read' && !firstReadAction) {
-        firstReadAction = actionName;
+  // Check operations block (format: "entity.operation")
+  if (yaml.operations) {
+    for (const operationName of Object.keys(yaml.operations)) {
+      operationNames.push(operationName);
+      // Check if it's a read operation (e.g., "task.get", "webpage.read")
+      if (operationName.includes('.') && operationName.split('.')[1] === 'read' && !firstReadOperation) {
+        firstReadOperation = operationName;
       }
     }
   }
+  
+  // Check if any operations are create/delete operations
+  const hasCreateOps = operationNames.some(op => op.includes('.create'));
+  const hasDeleteOps = operationNames.some(op => op.includes('.delete'));
   
   // Extract exemptions from testing.exempt
   const exemptions: PluginMeta['exemptions'] = {};
@@ -155,9 +156,9 @@ function parsePluginYaml(pluginDir: string): PluginMeta | null {
   return {
     id: yaml.id,
     hasAuth: yaml.auth !== null && yaml.auth !== undefined,
-    hasCreateOps: operations.includes('create'),
-    hasDeleteOps: operations.includes('delete'),
-    firstReadAction,
+    hasCreateOps,
+    hasDeleteOps,
+    firstReadAction: firstReadOperation,
     exemptions,
   };
 }

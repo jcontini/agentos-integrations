@@ -20,7 +20,7 @@ import { fileURLToPath } from 'url';
 import { parse as parseYaml } from 'yaml';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const INTEGRATIONS_ROOT = join(__dirname, '..', '..');
+const INTEGRATIONS_ROOT = join(__dirname, '../../..');
 const ENTITIES_DIR = join(INTEGRATIONS_ROOT, 'entities');
 const GRAPH_PATH = join(ENTITIES_DIR, 'graph.yaml');
 

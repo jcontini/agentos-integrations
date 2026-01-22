@@ -20,7 +20,7 @@ ERRORS=0
 if [ -n "$STAGED_READMES" ]; then
   echo "📋 Schema validation..."
   APPS=$(echo "$STAGED_READMES" | sed 's|plugins/||' | sed 's|/readme.md||' | tr '\n' ' ')
-  node tests/scripts/validate-schema.mjs $APPS --no-move || ERRORS=$((ERRORS + 1))
+  node tests/plugins/scripts/validate.mjs $APPS --no-move || ERRORS=$((ERRORS + 1))
   echo ""
 fi
 
@@ -61,14 +61,14 @@ if [ -n "$STAGED_TESTS" ] || [ -n "$STAGED_READMES" ]; then
   fi
   PLUGINS=$(echo "$PLUGINS" | tr ' ' '\n' | sort -u | tr '\n' ' ')
   
-  npx tsx tests/scripts/lint-tests.ts $PLUGINS || ERRORS=$((ERRORS + 1))
+  npx tsx tests/plugins/scripts/lint-tests.ts $PLUGINS || ERRORS=$((ERRORS + 1))
   echo ""
 fi
 
 # === Graph Validation (for entity changes) ===
 if [ -n "$STAGED_ENTITIES" ]; then
   echo "🔗 Graph validation..."
-  node tests/scripts/validate-graph.mjs || ERRORS=$((ERRORS + 1))
+  node tests/entities/scripts/validate-graph.mjs || ERRORS=$((ERRORS + 1))
   echo ""
 fi
 

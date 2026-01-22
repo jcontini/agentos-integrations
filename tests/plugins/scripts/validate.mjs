@@ -20,10 +20,10 @@ import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const ROOT = join(__dirname, '../..');  // tests/scripts/ -> root
+const ROOT = join(__dirname, '../../..');  // tests/plugins/scripts/ -> root
 const APPS_DIR = join(ROOT, 'plugins');
 const NEEDS_WORK_DIR = join(APPS_DIR, '.needs-work');
-const SCHEMA_PATH = join(ROOT, 'tests', 'plugin.schema.json');
+const SCHEMA_PATH = join(__dirname, '..', 'plugin.schema.json');
 
 // Load schema
 const schema = JSON.parse(readFileSync(SCHEMA_PATH, 'utf-8'));

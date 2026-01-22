@@ -6,7 +6,11 @@ import { defineConfig } from 'vitest/config';
  */
 export default defineConfig({
   test: {
-    include: ['tests/schema.test.ts'],
+    include: [
+      'tests/plugins/schema.test.ts',
+      'tests/entities/schema.test.ts',
+      'tests/entities/graph.test.ts',
+    ],
     
     // No setup file - schema tests don't need MCP
     setupFiles: [],

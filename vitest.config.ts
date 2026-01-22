@@ -6,6 +6,8 @@ export default defineConfig({
     include: [
       'plugins/**/tests/**/*.test.ts',
       'tests/**/*.test.ts',
+      'tests/plugins/**/*.test.ts',
+      'tests/entities/**/*.test.ts',
     ],
     // Exclude plugins in .needs-work folder
     exclude: [

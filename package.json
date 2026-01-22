@@ -7,12 +7,12 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:schema": "vitest run --config vitest.schema.config.ts",
-    "test:capabilities": "vitest run tests/capabilities.test.ts",
+    "test:capabilities": "vitest run tests/plugins/operations.test.ts",
     "test:needs-work": "vitest run plugins/.needs-work",
-    "validate": "node tests/scripts/validate-schema.mjs --all",
-    "lint:tests": "npx tsx tests/scripts/lint-tests.ts",
-    "new-plugin": "npx tsx tests/scripts/new-plugin.ts",
-    "test:changed": "./tests/scripts/test-changed.sh --staged",
+    "validate": "node tests/plugins/scripts/validate.mjs --all",
+    "lint:tests": "npx tsx tests/plugins/scripts/lint-tests.ts",
+    "new-plugin": "npx tsx tests/plugins/scripts/new-plugin.ts",
+    "test:changed": "./tests/test-changed.sh --staged",
     "prepare": "husky"
   },
   "devDependencies": {

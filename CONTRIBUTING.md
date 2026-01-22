@@ -1,8 +1,8 @@
-# Contributing to AgentOS Community
+# Contributing to the AgentOS Community
 
 Declarative YAML for entities, plugins, components, apps, and themes.
 
-**Schema reference:** `tests/plugin.schema.json` — the source of truth for plugin structure.
+**Schema reference:** `tests/plugins/plugin.schema.json` — the source of truth for plugin structure.
 
 ---
 
@@ -689,7 +689,7 @@ CSS and assets in `themes/{family}/{theme-id}/`.
 
 `npm run validate` checks three things:
 
-1. **Schema validation** — YAML structure matches `tests/plugin.schema.json`
+1. **Schema validation** — YAML structure matches `tests/plugins/plugin.schema.json`
 2. **Test coverage** — every operation and utility has a test
 3. **Required files** — `icon.png` exists
 
@@ -702,6 +702,10 @@ npm run validate -- --no-move       # Validate without auto-moving failures
 **Auto-move behavior:** By default, plugins that fail validation are automatically moved to `plugins/.needs-work/`. This keeps the main plugins directory clean. Use `--no-move` to disable this (useful for pre-commit hooks).
 
 A plugin fails validation if any operation/utility lacks a test. The validator looks for `tool: 'operation.name'` in your test files.
+
+**Test structure:** Tests are organized by domain:
+- `tests/plugins/` — Plugin schema and operations tests
+- `tests/entities/` — Entity schema and graph validation
 
 ### Functional Tests
 
@@ -733,7 +737,7 @@ To fix a plugin in `.needs-work`:
 Tests live in `plugins/{name}/tests/{name}.test.ts`. Every operation needs at least one test.
 
 ```typescript
-import { aos, TEST_PREFIX } from '../../../tests/utils/fixtures';
+import { aos, TEST_PREFIX } from '../../../tests/fixtures';
 
 describe('My Plugin', () => {
   it('operation.list returns array', async () => {

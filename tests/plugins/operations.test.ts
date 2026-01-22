@@ -8,7 +8,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { aos } from './utils/fixtures';
+import { aos } from '../fixtures';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'yaml';
@@ -103,12 +103,12 @@ const ENTITY_SCHEMAS: Record<string, {
 };
 
 // Scan plugins directory to find all plugins with entity operations
-function findPluginsWithEntities(): Array<{
+function findPluginsWithOperations(): Array<{
   plugin: string;
   tool: string;
   entityOperation: string; // format: "entity.operation"
 }> {
-  const pluginsDir = path.join(__dirname, '..', 'plugins');
+  const pluginsDir = path.join(__dirname, '../..', 'plugins');
   const results: Array<{
     plugin: string;
     tool: string;
@@ -117,7 +117,9 @@ function findPluginsWithEntities(): Array<{
   
   if (!fs.existsSync(pluginsDir)) return results;
   
-  const pluginDirs = fs.readdirSync(pluginsDir);
+  const pluginDirs = fs.readdirSync(pluginsDir, { withFileTypes: true })
+    .filter(d => d.isDirectory() && d.name !== '.needs-work')
+    .map(d => d.name);
   
   for (const dir of pluginDirs) {
     const readmePath = path.join(pluginsDir, dir, 'readme.md');
@@ -132,17 +134,15 @@ function findPluginsWithEntities(): Array<{
     try {
       const config = yaml.parse(match[1]);
       
-      // Look for entities: block (new format)
-      if (config.entities) {
-        for (const [entityName, operations] of Object.entries(config.entities)) {
-          const ops = operations as Record<string, unknown>;
-          for (const operationName of Object.keys(ops)) {
-            results.push({
-              plugin: config.id || dir,
-              tool: `${entityName}.${operationName}`,
-              entityOperation: `${entityName}.${operationName}`,
-            });
-          }
+      // Look for operations: block (current format)
+      if (config.operations) {
+        for (const operationName of Object.keys(config.operations)) {
+          // Operation names are in format "entity.operation" (e.g., "task.list")
+          results.push({
+            plugin: config.id || dir,
+            tool: operationName,
+            entityOperation: operationName,
+          });
         }
       }
     } catch (e) {
@@ -157,7 +157,7 @@ function findPluginsWithEntities(): Array<{
 const targetPlugin = process.env.TEST_PLUGIN;
 
 describe('Entity Operation Schema Validation', () => {
-  const plugins = findPluginsWithEntities();
+  const plugins = findPluginsWithOperations();
   
   // Group by entity.operation for organized output
   const byEntityOp = new Map<string, typeof plugins>();
