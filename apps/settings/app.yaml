@@ -68,7 +68,6 @@ views:
               - component: layout/stack
                 props:
                   gap: 16
-                  padding: 16
                 children:
                   - component: settings-panel
                     props:
@@ -80,7 +79,6 @@ views:
               - component: layout/stack
                 props:
                   gap: 16
-                  padding: 16
                 children:
                   - component: settings-panel
                     props:
@@ -92,7 +90,6 @@ views:
               - component: layout/stack
                 props:
                   gap: 16
-                  padding: 16
                 children:
                   - component: text
                     props:
@@ -106,7 +103,6 @@ views:
               - component: layout/stack
                 props:
                   gap: 16
-                  padding: 16
                 children:
                   - component: settings-panel
                     props:
@@ -118,75 +114,34 @@ views:
               - component: layout/stack
                 props:
                   gap: 16
-                  padding: 16
                 children:
                   - component: text
                     props:
                       content: Configured Accounts
                       variant: title
-                  - component: text
-                    props:
-                      content: "Credential accounts by plugin will appear here."
-                      variant: body
+                  - component: credential-list
 
           about:
-            component: layout/stack
-            props:
-              gap: 20
-              align: center
-              padding: 32
+            component: layout/scroll-area
             children:
-              - component: text
-                props:
-                  content: AgentOS
-                  variant: title
-                  align: center
               - component: layout/stack
                 props:
-                  gap: 8
-                  align: center
+                  gap: 16
                 children:
-                  - component: text
-                    props:
-                      content: "The semantic layer between AI assistants and your digital life"
-                      variant: body
-                      align: center
-                  - component: text
-                    props:
-                      content: "Version 0.1.0"
-                      variant: caption
-                      align: center
+                  - component: about-panel
 
   # Standalone about view (accessible from menu)
   about:
     title: About AgentOS
     layout:
-      - component: layout/stack
-        props:
-          gap: 20
-          align: center
-          padding: 32
+      - component: layout/scroll-area
         children:
-          - component: text
-            props:
-              content: AgentOS
-              variant: title
-              align: center
           - component: layout/stack
             props:
-              gap: 8
-              align: center
+              gap: 16
+              padding: 16
             children:
-              - component: text
-                props:
-                  content: "The semantic layer between AI assistants and your digital life"
-                  variant: body
-                  align: center
-              - component: text
-                props:
-                  content: "Version 0.1.0"
-                  variant: caption
-                  align: center
+              - component: about-panel
 
   # Plugin sources view
   sources:

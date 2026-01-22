@@ -533,7 +533,7 @@ input[type=radio]:disabled + label {
 .toggle-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
   cursor: pointer;
 }
 
@@ -542,7 +542,7 @@ input[type=radio]:disabled + label {
 }
 
 .toggle-label {
-  font-weight: bold;
+  font-weight: normal;
 }
 
 .toggle-description {
@@ -996,6 +996,10 @@ progress:not([value])::-webkit-progress-value {
 /* Tab container - padding at top matches macOS 9 pattern */
 .tabs {
   padding-top: 12px; /* Breathing room before tabs (macOS 9 style) */
+  display: flex;
+  flex-direction: column;
+  height: 100%;       /* Fill parent container */
+  min-height: 0;      /* Allow shrinking (important for nested flex) */
 }
 
 .tabs > menu {
@@ -1003,6 +1007,7 @@ progress:not([value])::-webkit-progress-value {
   gap: 28px;
   overflow: hidden;
   padding: 0 14px 0 24px;
+  flex-shrink: 0;     /* Tab bar never shrinks */
 }
 
 .tabs > menu > button {
@@ -1077,6 +1082,10 @@ progress:not([value])::-webkit-progress-value {
   border: 1px solid #000;
   box-shadow: inset 1px 1px 0 #ccc, inset 2px 2px 0 #fff, inset -1px -1px 0 #999, inset -2px -2px 0 #bbb;
   /*box-shadow: inset 1px 0 0 #ccc, inset 2px 0 0 #fff, inset -1px -1px 0 #999, inset -2px -2px 0 #bbb;*/
+  flex: 1;            /* Take remaining space */
+  min-height: 0;      /* Allow shrinking below content size */
+  overflow: auto;     /* Scroll when content overflows */
+  padding: 16px;      /* macOS 9 style inner padding */
 }
 
 .list {
@@ -2504,4 +2513,286 @@ progress:not([value])::-webkit-progress-value {
   padding: 2px 6px;
   border-radius: 3px;
   width: fit-content;
+}
+
+/* =============================================================================
+   Credential List Component
+   Displays credential accounts grouped by plugin
+   ============================================================================= */
+
+.credential-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.credential-list--loading,
+.credential-list--error,
+.credential-list--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  min-height: 150px;
+}
+
+.credential-list-loading,
+.credential-list-error,
+.credential-list-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.credential-list-loading .progress-bar {
+  width: 200px;
+}
+
+.credential-list-loading-text,
+.credential-list-empty-text {
+  font-size: 12px;
+  color: #666;
+}
+
+.credential-list-empty-icon {
+  font-size: 24px;
+  opacity: 0.6;
+}
+
+.credential-list-empty-hint {
+  font-size: 11px;
+  color: #888;
+  font-family: "Monaco", "Menlo", monospace;
+}
+
+.credential-list-error {
+  flex-direction: row;
+  gap: 8px;
+}
+
+.credential-list-error-icon {
+  font-size: 16px;
+}
+
+.credential-list-error-text {
+  font-size: 12px;
+  color: #c00;
+}
+
+/* Credential group (fieldset per plugin) */
+.credential-group {
+  margin: 0;
+  padding: 8px 12px;
+}
+
+.credential-group-name {
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.credential-accounts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.credential-account {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  font-size: 12px;
+}
+
+.credential-account-icon {
+  color: #4a4;
+  font-size: 8px;
+}
+
+.credential-account-name {
+  color: #333;
+}
+
+/* =============================================================================
+   About Panel Component
+   System information display
+   ============================================================================= */
+
+.about-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.about-panel--loading,
+.about-panel--error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  min-height: 200px;
+}
+
+.about-panel-loading,
+.about-panel-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.about-panel-loading .progress-bar {
+  width: 200px;
+}
+
+.about-panel-loading-text {
+  font-size: 12px;
+  color: #666;
+}
+
+.about-panel-error {
+  flex-direction: row;
+  gap: 8px;
+}
+
+.about-panel-error-icon {
+  font-size: 16px;
+}
+
+.about-panel-error-text {
+  font-size: 12px;
+  color: #c00;
+}
+
+/* Header section */
+.about-panel-header {
+  text-align: center;
+  padding: 16px 0;
+}
+
+.about-panel-title {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.about-panel-tagline {
+  margin: 0 0 4px;
+  font-size: 12px;
+  color: #555;
+}
+
+.about-panel-version {
+  margin: 0;
+  font-size: 11px;
+  color: #888;
+}
+
+/* Info sections */
+.about-panel-section {
+  margin: 0;
+  padding: 10px 12px;
+}
+
+.about-panel-section legend {
+  font-weight: bold;
+}
+
+.about-panel-info {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.about-panel-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.about-panel-row dt {
+  color: #555;
+  flex-shrink: 0;
+}
+
+.about-panel-row dd {
+  margin: 0;
+  text-align: right;
+  color: #000;
+}
+
+/* Paths section - values can be long */
+.about-panel-info--paths .about-panel-row {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.about-panel-info--paths .about-panel-row dd {
+  text-align: left;
+}
+
+.about-panel-path {
+  font-family: "Monaco", "Menlo", monospace;
+  font-size: 11px;
+  word-break: break-all;
+}
+
+.about-panel-size {
+  margin-left: 8px;
+  color: #888;
+  font-family: inherit;
+}
+
+/* Errors section */
+.about-panel-no-errors {
+  margin: 0;
+  font-size: 12px;
+  color: #4a4;
+  text-align: center;
+  padding: 8px;
+}
+
+.about-panel-errors {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.about-panel-error-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 0;
+  border-bottom: 1px solid #ddd;
+  font-size: 11px;
+}
+
+.about-panel-error-item:last-child {
+  border-bottom: none;
+}
+
+.about-panel-error-time {
+  color: #888;
+  font-size: 10px;
+}
+
+.about-panel-error-context {
+  font-family: "Monaco", "Menlo", monospace;
+  color: #555;
+}
+
+.about-panel-error-message {
+  color: #c00;
 }
