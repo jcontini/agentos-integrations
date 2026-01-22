@@ -16,9 +16,19 @@ entities/          Universal schemas (what a task/message/webpage IS)
   ...
 
 plugins/           Adapters (how services map to universal entities)
-  todoist/         Maps Todoist API → task entity
-  exa/             Maps Exa API → webpage entity
-  ...
+  tasks/           Category folder
+    todoist/       Maps Todoist API → task entity
+    linear/        Maps Linear API → task entity
+  search/          Category folder
+    exa/           Maps Exa API → webpage entity
+  calendar/
+    apple-calendar/
+  .needs-work/     Plugins that need completion
+    communication/
+    government/
+      us/
+        national/  Federal agencies (USPTO, etc.)
+        us-tx/     State agencies (TxDOT, etc.)
 
 components/        UI building blocks (TSX)
 apps/              Activity → component wiring (YAML)
@@ -76,13 +86,19 @@ Plugins are adapters that transform service-specific API responses into universa
 
 ### Structure
 
+Plugins are organized into category folders based on entity type or domain:
+
 ```
-plugins/{name}/
+plugins/{category}/{name}/
   readme.md     # Plugin definition (YAML front matter + markdown docs)
-  icon.png      # Required — 128x128 or larger PNG icon
-  icon.svg      # Optional — vector version
+  icon.svg      # Required — vector icon
   tests/        # Functional tests
 ```
+
+**Category types:**
+- **Entity-type categories:** `calendar/`, `contacts/`, `tasks/`, `search/`, `messages/`
+- **Domain categories:** `communication/`, `development/`, `social/`, `databases/`, `domains/`, `storage/`, `media/books/`
+- **Government plugins:** Use ISO 3166 codes — `government/us/national/`, `government/us/us-tx/`
 
 ```yaml
 # readme.md YAML front matter
@@ -94,7 +110,7 @@ operations:   # Entity CRUD (returns: entity, entity[], or void)
 utilities:    # Helpers with custom return shapes (optional)
 ```
 
-**Examples:** `plugins/todoist/` (REST API), `plugins/apple-calendar/` (Swift/native)
+**Examples:** `plugins/tasks/todoist/` (REST API), `plugins/calendar/apple-calendar/` (Swift/native)
 
 ### Dependencies
 
@@ -369,7 +385,8 @@ operations:
 
 ### Checklist
 
-- [ ] `icon.png` exists (128x128 or larger)
+- [ ] `icon.svg` exists (vector icon required)
+- [ ] Plugin is in the correct category folder
 - [ ] `npm run validate` passes (schema validation)
 - [ ] Parameters verified against API docs
 - [ ] Mapping covers entity properties (`entities/{entity}.yaml`)
@@ -453,7 +470,7 @@ Components use class names that themes style. Add your component's CSS to the th
 
 Apps wire activities to components. They define what shows up when AI uses a capability.
 
-**Location:** `apps/{name}/app.yaml` with `icon.svg` or `icon.png`
+**Location:** `apps/{name}/app.yaml` with `icon.svg`
 
 ```
 apps/
@@ -772,7 +789,7 @@ CSS and assets in `themes/{family}/{theme-id}/`.
 
 1. **Schema validation** — YAML structure matches `tests/plugins/plugin.schema.json`
 2. **Test coverage** — every operation and utility has a test
-3. **Required files** — `icon.png` exists
+3. **Required files** — `icon.svg` exists
 
 ```bash
 npm run validate                    # All plugins
@@ -793,32 +810,47 @@ A plugin fails validation if any operation/utility lacks a test. The validator l
 Verify real API behavior:
 
 ```bash
-npm test                                    # All tests (excludes .needs-work)
-npm run test:needs-work                     # Only plugins in .needs-work
-npm test plugins/exa/tests                  # Single plugin
-npm test plugins/.needs-work/whatsapp       # Specific .needs-work plugin
+npm test                                              # All tests (excludes .needs-work)
+npm run test:needs-work                               # Only plugins in .needs-work
+npm test plugins/search/exa/tests                     # Single plugin
+npm test plugins/.needs-work/communication/whatsapp   # Specific .needs-work plugin
 ```
 
 **Note:** Tests automatically exclude plugins in `plugins/.needs-work/` to focus on working plugins. You can still test specific plugins in `.needs-work` by specifying their path directly.
 
 ### The `.needs-work` Folder
 
-Plugins that fail validation are automatically moved to `plugins/.needs-work/`. This includes:
-- Missing `icon.png`
+Plugins that need completion live in `plugins/.needs-work/`, organized by category:
+
+```
+plugins/.needs-work/
+  communication/
+    whatsapp/
+  government/
+    us/
+      national/
+        uspto/
+      us-tx/
+        tx-dot/
+```
+
+**What goes in `.needs-work`:**
+- Missing `icon.svg`
 - Schema validation errors
 - Missing tests for operations/utilities
+- Work-in-progress plugin specs
 
 To fix a plugin in `.needs-work`:
 1. Fix the issues (add icon, fix schema, add tests)
-2. Run `npm run validate` — if it passes, the plugin stays in `.needs-work` (auto-move only happens on failures)
-3. Manually move it back: `mv plugins/.needs-work/my-plugin plugins/my-plugin`
+2. Run `npm run validate` to verify
+3. Move it to the working category: `mv plugins/.needs-work/tasks/my-plugin plugins/tasks/my-plugin`
 
 ### Writing Tests
 
-Tests live in `plugins/{name}/tests/{name}.test.ts`. Every operation needs at least one test.
+Tests live in `plugins/{category}/{name}/tests/{name}.test.ts`. Every operation needs at least one test.
 
 ```typescript
-import { aos, TEST_PREFIX } from '../../../tests/fixtures';
+import { aos, TEST_PREFIX } from '../../../../tests/utils/fixtures';
 
 describe('My Plugin', () => {
   it('operation.list returns array', async () => {
@@ -832,7 +864,7 @@ describe('My Plugin', () => {
 });
 ```
 
-See `plugins/todoist/tests/` or `plugins/apple-calendar/tests/` for comprehensive examples.
+See `plugins/tasks/todoist/tests/` or `plugins/calendar/apple-calendar/tests/` for comprehensive examples.
 
 ---
 
