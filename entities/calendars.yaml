@@ -2,6 +2,7 @@
 # A collection of events
 
 id: calendar
+plural: calendars
 name: Calendar
 description: A collection of events
 

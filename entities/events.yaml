@@ -2,6 +2,7 @@
 # A calendar event
 
 id: event
+plural: events
 name: Event
 description: A calendar event
 

@@ -2,6 +2,7 @@
 # Video content from YouTube, Vimeo, or local files
 
 id: video
+plural: videos
 name: Video
 description: Video content with metadata and optional transcript
 

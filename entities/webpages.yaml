@@ -2,6 +2,7 @@
 # A web page with URL, title, and content
 
 id: webpage
+plural: webpages
 name: Web Page
 description: A web page with URL, title, and content
 

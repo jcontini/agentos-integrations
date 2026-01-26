@@ -2,6 +2,7 @@
 # A collection of tasks
 
 id: project
+plural: projects
 name: Project
 description: A collection of tasks
 

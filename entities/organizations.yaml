@@ -2,6 +2,7 @@
 # A company, group, or institution
 
 id: organization
+plural: organizations
 name: Organization
 description: A company, group, or institution
 

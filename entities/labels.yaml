@@ -2,6 +2,7 @@
 # A tag that can be applied to items
 
 id: label
+plural: labels
 name: Label
 description: A tag or category that can be applied to items for organization
 

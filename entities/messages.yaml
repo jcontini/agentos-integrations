@@ -2,6 +2,7 @@
 # A chat message
 
 id: message
+plural: messages
 name: Message
 description: A chat message
 

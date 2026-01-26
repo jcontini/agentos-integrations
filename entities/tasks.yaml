@@ -2,6 +2,7 @@
 # A unit of work to be done
 
 id: task
+plural: tasks
 name: Task
 description: A unit of work to be done
 

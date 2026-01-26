@@ -2,6 +2,7 @@
 # A message thread
 
 id: conversation
+plural: conversations
 name: Conversation
 description: A thread of messages
 

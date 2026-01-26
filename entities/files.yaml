@@ -2,6 +2,7 @@
 # A document or media file
 
 id: file
+plural: files
 name: File
 description: A document or media file
 
