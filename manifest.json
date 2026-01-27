@@ -1,0 +1,63 @@
+{
+  "version": "1.0.0",
+  "updated_at": "2026-01-27T00:00:00Z",
+  "plugins": [
+    {
+      "id": "todoist",
+      "name": "Todoist",
+      "description": "Personal task management with projects, priorities, and natural language parsing",
+      "icon": "plugins/todoist/icon.svg",
+      "tags": ["tasks", "productivity"],
+      "version": "1.0.0",
+      "author": "agentos"
+    },
+    {
+      "id": "linear",
+      "name": "Linear",
+      "description": "Project management for engineering teams",
+      "icon": "plugins/linear/icon.svg",
+      "tags": ["tasks", "project-management"],
+      "version": "1.0.0",
+      "author": "agentos"
+    }
+  ],
+  "apps": [
+    {
+      "id": "browser",
+      "name": "Browser",
+      "description": "Browse the web and view search results",
+      "icon": "apps/browser/icon.svg",
+      "version": "1.0.0",
+      "author": "agentos"
+    },
+    {
+      "id": "settings",
+      "name": "Settings",
+      "description": "Configure AgentOS preferences and plugins",
+      "icon": "apps/settings/icon.svg",
+      "version": "1.0.0",
+      "author": "agentos"
+    }
+  ],
+  "themes": [
+    {
+      "id": "macos9",
+      "name": "Mac OS 9",
+      "type": "os",
+      "description": "Classic Mac OS 9 platinum look and feel",
+      "preview": "themes/os/macos9/preview.png",
+      "version": "1.0.0",
+      "author": "agentos"
+    }
+  ],
+  "components": [
+    {
+      "id": "search-result",
+      "name": "Search Result",
+      "description": "Display a search result item with title, snippet, and URL",
+      "preview": "components/search-result/preview.png",
+      "version": "1.0.0",
+      "author": "agentos"
+    }
+  ]
+}
