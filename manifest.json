@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "updated_at": "2026-01-27T16:11:54.176Z",
+  "updated_at": "2026-01-27T17:25:09.072Z",
   "plugins": [
     {
       "id": "apple-calendar",
@@ -12,7 +12,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T16:05:02.812Z"
+      "updated_at": "2026-01-27T17:24:59.459Z"
     },
     {
       "id": "brave",
@@ -25,7 +25,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T16:05:02.812Z"
+      "updated_at": "2026-01-27T17:24:59.459Z"
     },
     {
       "id": "curl",
@@ -37,7 +37,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T16:05:02.812Z"
+      "updated_at": "2026-01-27T17:24:59.460Z"
     },
     {
       "id": "cursor",
@@ -49,7 +49,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T16:05:02.812Z"
+      "updated_at": "2026-01-27T17:24:59.460Z"
     },
     {
       "id": "demo",
@@ -61,7 +61,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T16:05:02.813Z"
+      "updated_at": "2026-01-27T17:24:59.460Z"
     },
     {
       "id": "exa",
@@ -74,7 +74,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T16:05:02.813Z"
+      "updated_at": "2026-01-27T17:24:59.460Z"
     },
     {
       "id": "firecrawl",
@@ -87,7 +87,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T16:05:02.813Z"
+      "updated_at": "2026-01-27T17:24:59.460Z"
     },
     {
       "id": "hardcover",
@@ -99,7 +99,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T16:05:02.813Z"
+      "updated_at": "2026-01-27T17:24:59.460Z"
     },
     {
       "id": "imessage",
@@ -112,7 +112,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T16:05:02.813Z"
+      "updated_at": "2026-01-27T17:24:59.461Z"
     },
     {
       "id": "instagram",
@@ -126,7 +126,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T16:05:02.814Z"
+      "updated_at": "2026-01-27T17:24:59.461Z"
     },
     {
       "id": "linear",
@@ -138,7 +138,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T16:05:02.814Z"
+      "updated_at": "2026-01-27T17:24:59.461Z"
     },
     {
       "id": "logo-dev",
@@ -151,7 +151,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T16:05:02.814Z"
+      "updated_at": "2026-01-27T17:24:59.461Z"
     },
     {
       "id": "mysql",
@@ -163,7 +163,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T16:05:02.814Z"
+      "updated_at": "2026-01-27T17:24:59.461Z"
     },
     {
       "id": "reddit",
@@ -176,7 +176,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T16:05:02.814Z"
+      "updated_at": "2026-01-27T17:24:59.461Z"
     },
     {
       "id": "sqlite",
@@ -188,7 +188,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T16:05:02.815Z"
+      "updated_at": "2026-01-27T17:24:59.462Z"
     },
     {
       "id": "todoist",
@@ -200,7 +200,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T16:05:02.815Z"
+      "updated_at": "2026-01-27T17:24:59.462Z"
     },
     {
       "id": "youtube",
@@ -213,7 +213,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T16:05:02.815Z"
+      "updated_at": "2026-01-27T17:24:59.462Z"
     }
   ],
   "apps": [],
@@ -226,16 +226,8 @@
       "preview": "themes/os/macos9/preview.png",
       "version": "1.0.0",
       "author": "agentos",
-      "updated_at": "2026-01-24T14:28:54.316Z"
+      "updated_at": "2026-01-27T17:24:59.464Z"
     }
   ],
-  "components": [
-    {
-      "id": "layout/split-view",
-      "name": "Split View",
-      "description": "Resizable split panel layout",
-      "version": "1.0.0",
-      "author": "community"
-    }
-  ]
+  "components": []
 }
