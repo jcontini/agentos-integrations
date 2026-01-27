@@ -4,6 +4,18 @@ Declarative YAML for entities, plugins, components, apps, and themes.
 
 **Schema reference:** `tests/plugins/plugin.schema.json` — the source of truth for plugin structure.
 
+## 🎉 Manifest Auto-Generates!
+
+**You don't need to manually update `manifest.json`!** 
+
+When you add or modify plugins, apps, themes, or components, a GitHub Action automatically:
+1. Scans the repository structure
+2. Reads metadata from YAML front matter
+3. Generates an updated `manifest.json`
+4. Commits it back to the repo
+
+Just add your files and the manifest updates automatically on merge to `main`.
+
 ---
 
 ## Architecture Overview
