@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "updated_at": "2026-01-28T00:33:51.796Z",
+  "updated_at": "2026-01-28T00:34:59.796Z",
   "plugins": [
     {
       "id": "apple-calendar",
@@ -12,7 +12,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T22:56:40.249Z"
+      "updated_at": "2026-01-28T00:34:48.429Z"
     },
     {
       "id": "brave",
@@ -25,7 +25,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T16:05:02.812Z"
+      "updated_at": "2026-01-28T00:34:48.429Z"
     },
     {
       "id": "curl",
@@ -37,7 +37,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T22:56:39.562Z"
+      "updated_at": "2026-01-28T00:34:48.429Z"
     },
     {
       "id": "cursor",
@@ -49,19 +49,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T22:56:39.563Z"
-    },
-    {
-      "id": "demo",
-      "name": "Demo",
-      "description": "Demos using free public APIs - no API keys needed!",
-      "icon": "plugins/demo/icon.svg",
-      "tags": [
-        "utilities"
-      ],
-      "version": "1.0.0",
-      "author": "community",
-      "updated_at": "2026-01-28T00:33:51.711Z"
+      "updated_at": "2026-01-28T00:34:48.429Z"
     },
     {
       "id": "exa",
@@ -74,7 +62,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T22:56:40.249Z"
+      "updated_at": "2026-01-28T00:34:48.429Z"
     },
     {
       "id": "firecrawl",
@@ -87,7 +75,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T22:56:39.562Z"
+      "updated_at": "2026-01-28T00:34:48.429Z"
     },
     {
       "id": "hardcover",
@@ -99,7 +87,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T22:56:39.562Z"
+      "updated_at": "2026-01-28T00:34:48.430Z"
     },
     {
       "id": "imessage",
@@ -112,7 +100,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T22:56:39.562Z"
+      "updated_at": "2026-01-28T00:34:48.430Z"
     },
     {
       "id": "instagram",
@@ -126,7 +114,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T22:56:39.562Z"
+      "updated_at": "2026-01-28T00:34:48.430Z"
     },
     {
       "id": "linear",
@@ -138,7 +126,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T22:56:39.563Z"
+      "updated_at": "2026-01-28T00:34:48.430Z"
     },
     {
       "id": "logo-dev",
@@ -151,7 +139,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T22:56:39.563Z"
+      "updated_at": "2026-01-28T00:34:48.430Z"
     },
     {
       "id": "mysql",
@@ -163,7 +151,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T22:56:39.562Z"
+      "updated_at": "2026-01-28T00:34:48.431Z"
     },
     {
       "id": "reddit",
@@ -176,7 +164,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T22:56:39.562Z"
+      "updated_at": "2026-01-28T00:34:48.431Z"
     },
     {
       "id": "sqlite",
@@ -188,7 +176,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T22:56:39.563Z"
+      "updated_at": "2026-01-28T00:34:48.431Z"
     },
     {
       "id": "todoist",
@@ -200,7 +188,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T22:56:39.563Z"
+      "updated_at": "2026-01-28T00:34:48.431Z"
     },
     {
       "id": "youtube",
@@ -213,7 +201,7 @@
       ],
       "version": "1.0.0",
       "author": "community",
-      "updated_at": "2026-01-27T22:56:39.563Z"
+      "updated_at": "2026-01-28T00:34:48.431Z"
     }
   ],
   "apps": [],
@@ -226,7 +214,7 @@
       "preview": "themes/os/macos9/preview.png",
       "version": "1.0.0",
       "author": "agentos",
-      "updated_at": "2026-01-24T14:28:54.316Z"
+      "updated_at": "2026-01-28T00:34:48.434Z"
     }
   ],
   "components": []
